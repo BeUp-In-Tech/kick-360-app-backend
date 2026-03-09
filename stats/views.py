@@ -1,6 +1,7 @@
 from rest_framework import generics, serializers
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework.permissions import IsAuthenticated
+from core.permissions import HasActiveSubscription
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from accounts.models import User
@@ -9,65 +10,6 @@ from core.exceptions import APIResponse
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Sum
 from .services import LeaderboardService
-
-class GlobalStatsSerializer(serializers.Serializer):
-    pass
-
-class GlobalStatsView(generics.GenericAPIView):
-    permission_classes = (IsAuthenticated,)
-    serializer_class = GlobalStatsSerializer
-
-    def get(self, request, *args, **kwargs):
-        # Aggregate global stats
-        total_kicks = User.objects.aggregate(total=Sum('total_kicks'))['total'] or 0
-        total_users = User.objects.count()
-        
-        return APIResponse(
-            data={
-                "total_global_kicks": total_kicks,
-                "total_users": total_users
-            },
-            message="Global stats retrieved."
-        )
-
-class CountryStatsSerializer(serializers.Serializer):
-    pass
-
-class CountryStatsView(generics.GenericAPIView):
-    permission_classes = (IsAuthenticated,)
-    serializer_class = CountryStatsSerializer
-
-    def get(self, request, country_name, *args, **kwargs):
-        users_in_country = User.objects.filter(country__iexact=country_name)
-        total_kicks = users_in_country.aggregate(total=Sum('total_kicks'))['total'] or 0
-        total_users = users_in_country.count()
-        
-        return APIResponse(
-            data={
-                "country": country_name,
-                "total_kicks": total_kicks,
-                "total_users": total_users
-            },
-            message=f"Stats for {country_name} retrieved."
-        )
-
-class UserStatsListView(generics.ListAPIView):
-    permission_classes = (IsAuthenticated,)
-    serializer_class = UserSerializer
-    filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['country', 'position']
-    queryset = User.objects.filter(is_active=True).order_by('-total_kicks')
-
-    def list(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
-        page = self.paginate_queryset(queryset)
-        
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
-
-        serializer = self.get_serializer(queryset, many=True)
-        return APIResponse(data=serializer.data, message="Users stats retrieved.")
 
 class LeaderboardPlayerSerializer(serializers.Serializer):
     rank = serializers.IntegerField()
@@ -82,32 +24,98 @@ class LeaderboardResponseSerializer(serializers.Serializer):
     data = LeaderboardPlayerSerializer(many=True)
     message = serializers.CharField()
 
+from django.utils import timezone
+from .models import PerformanceTrack
+from .serializers import PerformanceTrackSerializer, PerformanceAIRequestSerializer
+
+class PerformanceRecordView(generics.CreateAPIView):
+    permission_classes = (IsAuthenticated, HasActiveSubscription)
+    serializer_class = PerformanceAIRequestSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        data = serializer.validated_data
+        video_info = data.get('video_info', {})
+        analysis_data = data.get('data', {}).get('analysis', {})
+        total_players = data.get('data', {}).get('total_players_detected', 0)
+        session_id = data.get('session_id')
+        
+        # Pick the first analysis entry or specific player id if provided
+        # For now, let's assume we take the first key in analysis
+        player_analysis = {}
+        if analysis_data:
+            first_key = list(analysis_data.keys())[0]
+            player_analysis = analysis_data[first_key]
+            
+        track = PerformanceTrack.objects.create(
+            user=request.user,
+            session_id=session_id,
+            pac=player_analysis.get('PAC', 0),
+            sho=player_analysis.get('SHO', 0),
+            pas=player_analysis.get('PAS', 0),
+            dri=player_analysis.get('DRI', 0),
+            _def=player_analysis.get('DEF', 0),
+            phy=player_analysis.get('PHY', 0),
+            filename=video_info.get('filename', ''),
+            total_duration_sec=video_info.get('total_duration_sec', 0.0),
+            fps=video_info.get('fps', 0.0),
+            total_players_detected=total_players
+        )
+        
+        # Update User Streak and Points
+        user = request.user
+        today = timezone.now().date()
+        
+        if user.last_session_date != today:
+            if user.last_session_date == today - timezone.timedelta(days=1):
+                user.streak += 1
+            else:
+                user.streak = 1
+            user.last_session_date = today
+            
+        # Give some points for the session
+        user.points += 10 # Default points for attempt
+        user.save()
+        
+        return APIResponse(
+            data=PerformanceTrackSerializer(track).data,
+            message="Performance tracked and user stats updated."
+        )
+
 class StatsLeaderboardView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, HasActiveSubscription]
     
     @extend_schema(
         parameters=[
             OpenApiParameter(name='filter', description='Filter type (everyone, germany, following)', required=False, type=str),
-            OpenApiParameter(name='user_id', description='User ID for following filter', required=False, type=str),
+            OpenApiParameter(name='month', description='Month (1-12)', required=False, type=int),
+            OpenApiParameter(name='year', description='Year', required=False, type=int),
         ],
         responses={200: LeaderboardResponseSerializer}
     )
     def get(self, request):
         filter_type = request.query_params.get('filter', 'everyone')
-        user_id = request.query_params.get('user_id', None)
+        month = request.query_params.get('month')
+        year = request.query_params.get('year')
+        
+        if month: month = int(month)
+        if year: year = int(year)
         
         user = request.user
-        
-        leaderboard_data = LeaderboardService.get_top_players(user, filter_type)
+        leaderboard_data = LeaderboardService.get_top_players(user, filter_type, month, year)
         
         response_data = [
             {
                 "rank": i + 1,
-                "name": player.name,
-                "profile_image": player.profile_image.url if player.profile_image else None,
-                "total_kicks": player.total_kicks,
-                "points": player.points,
-                "streak": player.streak
+                "user_id": player['user'],
+                "name": player['name'],
+                "profile_image": player['profile_image'], # Already absolute URL or placeholder in profile_image field
+                "total_score": player['monthly_score'],
+                "streak": player['streak'],
+                "total_kicks": player['total_kicks'],
+                "points": player['points']
             }
             for i, player in enumerate(leaderboard_data)
         ]
@@ -115,5 +123,5 @@ class StatsLeaderboardView(APIView):
         return Response({
             "success": True,
             "data": response_data,
-            "message": f"Top 11 players ({filter_type.capitalize()})"
+            "message": f"Top 11 players ({filter_type.capitalize()}) for {month or 'current'}/{year or 'current'}"
         })

@@ -5,8 +5,11 @@ from accounts.models import User
 class Tournament(BaseModel):
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
-    duration_days = models.IntegerField(default=7)
-    rules = models.TextField(blank=True)
+    start_date = models.DateTimeField(null=True, blank=True)
+    end_date = models.DateTimeField(null=True, blank=True)
+    product_purchase_link = models.URLField(max_length=500, null=True, blank=True)
+    prize_money = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    is_free = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
 
     def __str__(self):

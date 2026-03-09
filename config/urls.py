@@ -20,4 +20,5 @@ urlpatterns = [
     path('api/follows/', include('follows.urls')),
     path('api/settings/', include('settings_app.urls')),
     path('api/dashboard/', include('core.urls')),
+    path('api/admin/', include('admin_panel.urls')),
 ]

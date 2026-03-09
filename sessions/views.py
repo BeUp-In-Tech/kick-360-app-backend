@@ -1,5 +1,6 @@
 from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
+from core.permissions import HasActiveSubscription
 from .models import Session
 from .serializers import SessionSerializer, SessionCompleteSerializer, SessionShareToggleSerializer
 from .services import SessionService
@@ -9,7 +10,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 class SessionCompleteView(generics.CreateAPIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, HasActiveSubscription)
     serializer_class = SessionCompleteSerializer
 
     def create(self, request, *args, **kwargs):

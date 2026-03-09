@@ -5,7 +5,7 @@ from accounts.serializers import UserSerializer
 class TournamentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tournament
-        fields = ['id', 'title', 'description', 'duration_days', 'rules', 'is_active', 'created_at']
+        fields = ['id', 'title', 'description', 'start_date', 'end_date', 'prize_money', 'is_free', 'is_active', 'created_at']
 
 class TournamentParticipationSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)

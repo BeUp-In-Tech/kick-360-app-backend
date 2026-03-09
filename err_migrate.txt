@@ -1,0 +1,6 @@
+Operations to perform:
+  Apply all migrations: access_codes, accounts, admin, auth, contenttypes, core, follows, kick_sessions, sessions, tournaments, training
+Running migrations:
+  No migrations to apply.
+  Your models in app(s): 'stats', 'tournaments', 'training' have changes that are not yet reflected in a migration, and so won't be applied.
+  Run 'manage.py makemigrations' to make new migrations, and then re-run 'manage.py migrate' to apply them.

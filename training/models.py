@@ -3,30 +3,34 @@ from core.models import BaseModel
 from accounts.models import User
 
 class TrainingCategory(BaseModel):
-    name = models.CharField(max_length=100, unique=True)
+    title = models.CharField(max_length=100, unique=True)
+    description = models.TextField(blank=True)
     is_active = models.BooleanField(default=True)
 
     def __str__(self):
-        return self.name
+        return self.title
 
-class TrainingVideo(BaseModel):
+class TrainingSession(BaseModel):
+    category = models.ForeignKey(TrainingCategory, on_delete=models.CASCADE, related_name='sessions', null=True)
     title = models.CharField(max_length=255)
-    category = models.ForeignKey(TrainingCategory, on_delete=models.CASCADE, related_name='videos')
-    video_url = models.URLField(blank=True, null=True)
-    video_file = models.FileField(upload_to='training/videos/', blank=True, null=True)
-    score_required = models.IntegerField(default=0)
-    duration_time = models.IntegerField(default=60)  # seconds
+    subtitle = models.CharField(max_length=255, blank=True)
+    description = models.TextField(blank=True)
+    equipment_used = models.TextField(blank=True)
+    steps = models.TextField(blank=True)
+    video_file = models.FileField(upload_to='training/sessions/', blank=True, null=True)
+    duration_seconds = models.IntegerField(default=60)
     points = models.IntegerField(default=0)
-    is_active = models.BooleanField(default=True)
+    score_required = models.IntegerField(default=0)
+    is_published = models.BooleanField(default=False)
 
     def __str__(self):
         return self.title
 
 class TrainingCompletion(BaseModel):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='training_completions')
-    training_video = models.ForeignKey(TrainingVideo, on_delete=models.CASCADE)
+    training_session = models.ForeignKey(TrainingSession, on_delete=models.CASCADE, related_name='completions')
     score_achieved = models.IntegerField(default=0)
     points_awarded = models.IntegerField(default=0)
 
     def __str__(self):
-        return f"{self.user.name} completed {self.training_video.title}"
+        return f"{self.user.name} completed {self.training_session.title}"

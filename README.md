@@ -58,6 +58,11 @@ Once the server is running, visit:
 - **Redoc**: `http://127.0.0.1:8000/api/redoc/`
 - **Raw Schema**: `http://127.0.0.1:8000/api/schema/`
 
+admin@kick360.com
+
+adminpassword123
+12345678
+
 ### List of Endpoints & Explanations
 
 #### 1. Authentication (`/api/auth/`)

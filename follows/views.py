@@ -1,5 +1,6 @@
 from rest_framework import generics, status, serializers
 from rest_framework.permissions import IsAuthenticated
+from core.permissions import HasActiveSubscription
 from .models import Follow
 from accounts.models import User
 from .serializers import FollowSerializer, DiscoverUserSerializer
@@ -8,11 +9,11 @@ from django.db import IntegrityError
 from django_filters.rest_framework import DjangoFilterBackend
 
 class FollowUserView(generics.CreateAPIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, HasActiveSubscription)
     serializer_class = FollowSerializer
 
     def create(self, request, *args, **kwargs):
-        following_id = request.data.get('following_id')
+        following_id = request.data.get('following_id') or request.data.get('following')
         if not following_id:
             return APIResponse(message="following_id is required.", status=status.HTTP_400_BAD_REQUEST)
 
@@ -21,10 +22,15 @@ class FollowUserView(generics.CreateAPIView):
 
         try:
             following_user = User.objects.get(id=following_id, is_active=True)
+            
+            # Check follow limit (11 players)
+            if Follow.objects.filter(follower=request.user).count() >= 11:
+                return APIResponse(message="You can follow maximum 11 players.", status=status.HTTP_400_BAD_REQUEST)
+                
             follow = Follow.objects.create(follower=request.user, following=following_user)
             return APIResponse(data=FollowSerializer(follow).data, message=f"Successfully followed {following_user.name}")
-        except User.DoesNotExist:
-            return APIResponse(message="User not found.", status=status.HTTP_404_NOT_FOUND)
+        except (User.DoesNotExist, ValueError, ValidationError):
+            return APIResponse(message="User not found or invalid ID.", status=status.HTTP_404_NOT_FOUND)
         except IntegrityError:
             return APIResponse(message="You are already following this user.", status=status.HTTP_400_BAD_REQUEST)
 
@@ -44,7 +50,7 @@ class UnfollowUserView(generics.DestroyAPIView):
             return APIResponse(message="You are not following this user.", status=status.HTTP_404_NOT_FOUND)
 
 class DiscoverUsersView(generics.ListAPIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, HasActiveSubscription)
     serializer_class = DiscoverUserSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['country', 'position']

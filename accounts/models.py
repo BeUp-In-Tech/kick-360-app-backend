@@ -4,15 +4,21 @@ from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseU
 from django.utils import timezone
 
 class UserManager(BaseUserManager):
-    def create_user(self, access_code, name=None, **extra_fields):
-        if not access_code:
-            raise ValueError('The Access Code must be set')
-        user = self.model(access_code=access_code, name=name, **extra_fields)
-        user.set_unusable_password()  # Since login is access-code based
+    def create_user(self, access_code=None, email=None, name=None, **extra_fields):
+        if not access_code and not email:
+            raise ValueError('Either Access Code or Email must be set')
+        
+        if email:
+            email = self.normalize_email(email)
+            user = self.model(email=email, name=name, **extra_fields)
+        else:
+            user = self.model(access_code=access_code, name=name, **extra_fields)
+            
+        user.set_unusable_password()
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, access_code, name=None, password=None, **extra_fields):
+    def create_superuser(self, email, name=None, password=None, **extra_fields):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
 
@@ -21,9 +27,11 @@ class UserManager(BaseUserManager):
         if extra_fields.get('is_superuser') is not True:
             raise ValueError('Superuser must have is_superuser=True.')
 
-        user = self.create_user(access_code=access_code, name=name, **extra_fields)
+        user = self.create_user(email=email, name=name, **extra_fields)
         if password:
             user.set_password(password)
+        else:
+            raise ValueError('Superuser must have a password.')
         user.save(using=self._db)
         return user
 
@@ -35,8 +43,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     country = models.CharField(max_length=100, null=True, blank=True)
     position = models.CharField(max_length=50, null=True, blank=True)
     
-    # Core login field
-    access_code = models.CharField(max_length=100, unique=True)
+    # Core login fields
+    access_code = models.CharField(max_length=100, unique=True, null=True, blank=True)
+    email = models.EmailField(unique=True, null=True, blank=True)
     
     # Stats
     total_kicks = models.IntegerField(default=0)
@@ -49,9 +58,27 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
 
+    @property
+    def is_subscription_active(self):
+        """Checks if the user has an active, unexpired access code."""
+        if self.is_staff:
+            return True
+        
+        # TEMPORARY: Allow any 8-character alphanumeric code for testing
+        if self.access_code and len(self.access_code) == 8:
+            return True
+
+        from access_codes.models import AccessCode
+        active_code = AccessCode.objects.filter(
+            user=self, 
+            is_consumed=True, 
+            expires_at__gt=timezone.now()
+        ).exists()
+        return active_code
+
     objects = UserManager()
 
-    USERNAME_FIELD = 'access_code'
+    USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
 
     class Meta:

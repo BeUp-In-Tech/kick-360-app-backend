@@ -1,12 +1,13 @@
 from rest_framework import generics, status, serializers
 from rest_framework.permissions import IsAuthenticated
+from core.permissions import HasActiveSubscription
 from .models import Tournament, TournamentParticipation
 from .serializers import TournamentSerializer, TournamentParticipationSerializer
 from .services import TournamentService
 from core.exceptions import APIResponse
 
 class TournamentListView(generics.ListAPIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, HasActiveSubscription)
     serializer_class = TournamentSerializer
     queryset = Tournament.objects.filter(is_active=True).order_by('-created_at')
 
@@ -16,7 +17,7 @@ class TournamentListView(generics.ListAPIView):
         return APIResponse(data=serializer.data, message="Active tournaments retrieved.")
 
 class TournamentDetailView(generics.RetrieveAPIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, HasActiveSubscription)
     serializer_class = TournamentSerializer
     queryset = Tournament.objects.all()
 
@@ -29,7 +30,7 @@ class TournamentJoinSerializer(serializers.Serializer):
     pass
 
 class TournamentJoinView(generics.GenericAPIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, HasActiveSubscription)
     queryset = Tournament.objects.filter(is_active=True)
     serializer_class = TournamentJoinSerializer
 
@@ -50,7 +51,7 @@ class TournamentJoinView(generics.GenericAPIView):
             )
 
 class TournamentLeaderboardView(generics.ListAPIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, HasActiveSubscription)
     serializer_class = TournamentParticipationSerializer
 
     def get_queryset(self):
