@@ -19,6 +19,7 @@ urlpatterns = [
     path('api/stats/', include('stats.urls')),
     path('api/follows/', include('follows.urls')),
     path('api/settings/', include('settings_app.urls')),
+    path('api/notifications/', include('notifications.urls')),
     path('api/dashboard/', include('core.urls')),
     path('api/admin/', include('admin_panel.urls')),
 ]

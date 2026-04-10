@@ -38,8 +38,7 @@ class UserManager(BaseUserManager):
 class User(AbstractBaseUser, PermissionsMixin):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255, null=True, blank=True)
-    profile_image = models.TextField(null=True, blank=True)
-    #profile_image = models.ImageField(upload_to='profiles/', null=True, blank=True)
+    profile_image = models.ImageField(upload_to='profiles/', null=True, blank=True)
     country = models.CharField(max_length=100, null=True, blank=True)
     position = models.CharField(max_length=50, null=True, blank=True)
     

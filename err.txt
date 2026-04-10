@@ -1,1 +1,0 @@
-Was trainingcategory.name renamed to trainingcategory.title (a CharField)? [y/N] 

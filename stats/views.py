@@ -105,10 +105,17 @@ class StatsLeaderboardView(APIView):
         # Prepare leaderboard data with ranking
         top_11_data = []
         for i, player in enumerate(top_players):
+            avatar_url = ""
+            if player.profile_image:
+                try:
+                    avatar_url = player.profile_image.url if request is None else request.build_absolute_uri(player.profile_image.url)
+                except ValueError:
+                    avatar_url = str(player.profile_image)
+                    
             top_11_data.append({
                 "id": str(player.id),
                 "name": player.name or "Unknown",
-                "avatar": player.profile_image or "",
+                "avatar": avatar_url,
                 "points": player.points,
                 "rank": i + 1,
                 "total_kicks": player.total_kicks,

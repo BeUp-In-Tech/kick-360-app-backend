@@ -13,30 +13,28 @@ class AccessCodeVerifyView(generics.CreateAPIView):
     serializer_class = AccessCodeSerializer
 
     def create(self, request, *args, **kwargs):
+        from django.utils import timezone
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         
         code = serializer.validated_data['code']
         
         try:
-            # Verify with Shopify
-            result = ShopifyService.verify_access_code(code)
-            
-            if not result['is_valid']:
+            try:
+                access_code = AccessCode.objects.get(code=code)
+            except AccessCode.DoesNotExist:
                 return APIResponse(
                     data={},
-                    message=result.get('meta', {}).get('error', 'Invalid access code'),
+                    message="Invalid access code",
                     status=status.HTTP_400_BAD_REQUEST
                 )
             
-            # Check if code exists and is not consumed
-            access_code, created = AccessCode.objects.get_or_create(
-                code=code,
-                defaults={
-                    'user': request.user,
-                    'is_consumed': False
-                }
-            )
+            if access_code.status == 'not_sent':
+                return APIResponse(
+                    data={},
+                    message="Access code is not activated (status: not_sent).",
+                    status=status.HTTP_400_BAD_REQUEST
+                )
             
             if access_code.is_consumed:
                 return APIResponse(

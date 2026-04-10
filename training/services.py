@@ -2,6 +2,7 @@ from django.db import transaction
 from .models import TrainingSession, TrainingCompletion
 from core.models import UserActivityLog
 from accounts.models import User
+from notifications.utils import send_push_notification
 
 class TrainingService:
     @staticmethod
@@ -27,6 +28,15 @@ class TrainingService:
             user=user,
             activity_type='session_complete',
             description=f"Completed {training_session.title} (+{points_to_award} points)"
+        )
+        
+        # Notify admins
+        admins = User.objects.filter(is_staff=True)
+        send_push_notification(
+            users=admins,
+            title="Training Completed Alert",
+            body=f"{user.name or user.email} just completed training: {training_session.title}.",
+            data_payload={'type': 'training_complete', 'training_id': str(training_session.id), 'user_id': str(user.id)}
         )
         
         return completion

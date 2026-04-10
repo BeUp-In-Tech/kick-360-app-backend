@@ -1,5 +1,6 @@
 from django.utils import timezone
 from .models import Tournament, TournamentParticipation
+from notifications.utils import send_push_notification
 from accounts.models import User
 
 class TournamentService:
@@ -11,6 +12,22 @@ class TournamentService:
         """
         if not tournament.is_active:
             raise ValueError("This tournament is no longer active.")
+            
+        # Log the activity
+        UserActivityLog.objects.create(
+            user=user,
+            activity_type='tournament_join',
+            description=f"Joined tournament: {tournament.title}"
+        )
+        
+        # Notify admins
+        admins = User.objects.filter(is_staff=True)
+        send_push_notification(
+            users=admins,
+            title="Tournament Join Alert",
+            body=f"{user.name or user.email} just joined {tournament.title}.",
+            data_payload={'type': 'tournament_join', 'tournament_id': str(tournament.id), 'user_id': str(user.id)}
+        )
             
         participation, created = TournamentParticipation.objects.get_or_create(
             user=user,

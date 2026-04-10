@@ -1,4 +1,4 @@
-from rest_framework import generics, status, serializers
+from rest_framework import generics, status, serializers, parsers
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -6,6 +6,7 @@ from .models import User
 from .serializers import RegisterSerializer, LoginSerializer, UserSerializer
 from access_codes.models import AccessCode
 from core.exceptions import APIResponse
+from notifications.utils import send_push_notification
 
 def get_tokens_for_user(user):
     refresh = RefreshToken.for_user(user)
@@ -17,6 +18,7 @@ def get_tokens_for_user(user):
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
     permission_classes = (AllowAny,)
+    parser_classes = (parsers.MultiPartParser, parsers.FormParser)
     serializer_class = RegisterSerializer
 
     def create(self, request, *args, **kwargs):
@@ -26,30 +28,27 @@ class RegisterView(generics.CreateAPIView):
         # Get the access code string from validated data
         code_str = serializer.validated_data['access_code']
         
-        # Strictly accept any 8-character alphanumeric string as valid for now
-        import re
-        if not re.match(r'^[a-zA-Z0-9]{8}$', code_str):
-             return APIResponse(message="Access code must be exactly 8 characters long (letters and numbers).", status=status.HTTP_400_BAD_REQUEST)
-        
-        # Ensure the code is not already used by another user (if we want to enforce uniqueness)
+        # Ensure the code is not already used by another user locally
         if User.objects.filter(access_code=code_str).exists():
             return APIResponse(message="This access code is already registered.", status=status.HTTP_400_BAD_REQUEST)
 
         user = serializer.save()
         
-        # Mark code as consumed in the AccessCode model if it exists, or just rely on User.access_code
+        # Mark code as consumed in the AccessCode model
         from django.utils import timezone
         from core.models import UserActivityLog
         
-        # Sync with AccessCode model if it exists
-        AccessCode.objects.get_or_create(
+        # Sync with AccessCode model if it doesn't exist locally
+        access_code_obj, created = AccessCode.objects.get_or_create(
             code=code_str,
-            defaults={
-                'user': user,
-                'is_consumed': True,
-                'consumed_at': timezone.now()
-            }
+            defaults={'status': 'sent'}
         )
+        access_code_obj.user = user
+        from dateutil.relativedelta import relativedelta
+        access_code_obj.is_consumed = True
+        access_code_obj.consumed_at = timezone.now()
+        access_code_obj.expires_at = access_code_obj.consumed_at + relativedelta(months=access_code_obj.duration_months or 1)
+        access_code_obj.save()
 
         # Log Activity
         UserActivityLog.objects.create(
@@ -57,6 +56,15 @@ class RegisterView(generics.CreateAPIView):
             activity_type='register',
             description=f"User registered with code {code_str}",
             ip_address=request.META.get('REMOTE_ADDR')
+        )
+        
+        # Notify admins
+        admins = User.objects.filter(is_staff=True)
+        send_push_notification(
+            users=admins,
+            title="New User Registered",
+            body=f"A new user has registered with code: {code_str}",
+            data_payload={'type': 'new_user', 'user_id': str(user.id)}
         )
         
         tokens = get_tokens_for_user(user)

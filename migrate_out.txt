@@ -1,6 +1,0 @@
-Operations to perform:
-  Apply all migrations: access_codes, accounts, admin, auth, contenttypes, core, follows, kick_sessions, sessions, stats, tournaments, training
-Running migrations:
-  Applying training.0003_rename_name_trainingcategory_title_and_more... OK
-  Applying stats.0001_initial... OK
-  Applying tournaments.0003_remove_tournament_entry_fee_and_more... OK

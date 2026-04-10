@@ -3,7 +3,9 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from tournaments.models import Tournament, TournamentParticipation
+from accounts.models import User
 from admin_panel.permissions import IsAdminRole, AdminLoggerMixin
+from notifications.utils import send_push_notification
 from .serializers import AdminTournamentSerializer, AdminTournamentParticipationSerializer
 
 class AdminTournamentViewSet(viewsets.ModelViewSet, AdminLoggerMixin):
@@ -25,6 +27,15 @@ class AdminTournamentViewSet(viewsets.ModelViewSet, AdminLoggerMixin):
         
         tournament = serializer.save()
         self.log_action(self.request.user, "Created Tournament", "Tournament", str(tournament.id))
+        
+        # Broadcast to all active users
+        users = User.objects.filter(is_active=True)
+        send_push_notification(
+            users=users,
+            title="New Tournament Available!",
+            body=f"{tournament.title} is now open.",
+            data_payload={'type': 'new_tournament', 'tournament_id': str(tournament.id)}
+        )
 
     def perform_update(self, serializer):
         is_free = serializer.validated_data.get('is_free', False)

@@ -2,9 +2,10 @@ from rest_framework import viewsets, status, parsers
 from drf_spectacular.utils import extend_schema
 from rest_framework.decorators import action
 from rest_framework.response import Response
-
 from training.models import TrainingCategory, TrainingSession
+from accounts.models import User
 from admin_panel.permissions import IsAdminRole, AdminLoggerMixin
+from notifications.utils import send_push_notification
 
 from .serializers import (
     AdminTrainingSessionSerializer,
@@ -81,6 +82,15 @@ class AdminTrainingSessionViewSet(viewsets.ModelViewSet, AdminLoggerMixin):
             "Created Training Session",
             "TrainingSession",
             str(session.id)
+        )
+        
+        # Broadcast to all active users
+        users = User.objects.filter(is_active=True)
+        send_push_notification(
+            users=users,
+            title="New Training Video Available!",
+            body=f"Check out our new training video: {session.title}.",
+            data_payload={'type': 'new_training', 'training_id': str(session.id)}
         )
 
     def perform_update(self, serializer):

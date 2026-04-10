@@ -8,6 +8,14 @@ paths:
     get:
       operationId: admin_access_codes_list
       parameters:
+      - in: query
+        name: is_active
+        schema:
+          type: boolean
+      - in: query
+        name: is_consumed
+        schema:
+          type: boolean
       - name: page
         required: false
         in: query
@@ -31,31 +39,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedAdminAccessCodeDetailList'
           description: ''
-    post:
-      operationId: admin_access_codes_create
-      tags:
-      - admin
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AdminAccessCodeDetail'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/AdminAccessCodeDetail'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/AdminAccessCodeDetail'
-        required: true
-      security:
-      - jwtAuth: []
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AdminAccessCodeDetail'
-          description: ''
   /api/admin/access-codes/{id}/:
     get:
       operationId: admin_access_codes_retrieve
@@ -69,39 +52,6 @@ paths:
         required: true
       tags:
       - admin
-      security:
-      - jwtAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AdminAccessCodeDetail'
-          description: ''
-    put:
-      operationId: admin_access_codes_update
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: string
-          format: uuid
-        description: A UUID string identifying this access code.
-        required: true
-      tags:
-      - admin
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AdminAccessCodeDetail'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/AdminAccessCodeDetail'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/AdminAccessCodeDetail'
-        required: true
       security:
       - jwtAuth: []
       responses:
@@ -127,13 +77,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PatchedAdminAccessCodeDetail'
+              $ref: '#/components/schemas/PatchedAdminAccessCodeDetailRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/PatchedAdminAccessCodeDetail'
+              $ref: '#/components/schemas/PatchedAdminAccessCodeDetailRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/PatchedAdminAccessCodeDetail'
+              $ref: '#/components/schemas/PatchedAdminAccessCodeDetailRequest'
       security:
       - jwtAuth: []
       responses:
@@ -207,6 +157,33 @@ paths:
               schema:
                 $ref: '#/components/schemas/AdminOverview'
           description: ''
+  /api/admin/auth/forgot-password/:
+    post:
+      operationId: admin_auth_forgot_password_create
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ForgotPasswordRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ForgotPasswordRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ForgotPasswordRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForgotPassword'
+          description: ''
   /api/admin/auth/login/:
     post:
       operationId: admin_auth_login_create
@@ -216,13 +193,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/AdminLogin'
+              $ref: '#/components/schemas/AdminLoginRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/AdminLogin'
+              $ref: '#/components/schemas/AdminLoginRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/AdminLogin'
+              $ref: '#/components/schemas/AdminLoginRequest'
         required: true
       security:
       - jwtAuth: []
@@ -243,22 +220,45 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/AdminPasswordReset'
+              $ref: '#/components/schemas/AdminPasswordResetRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/AdminPasswordReset'
+              $ref: '#/components/schemas/AdminPasswordResetRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/AdminPasswordReset'
+              $ref: '#/components/schemas/AdminPasswordResetRequest'
         required: true
       security:
       - jwtAuth: []
       responses:
         '200':
+          description: No response body
+  /api/admin/auth/set-new-password/:
+    post:
+      operationId: admin_auth_set_new_password_create
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetNewPasswordRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SetNewPasswordRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SetNewPasswordRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AdminPasswordReset'
+                $ref: '#/components/schemas/SetNewPassword'
           description: ''
   /api/admin/leaderboard/:
     get:
@@ -303,13 +303,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PatchedAdminLeaderboard'
+              $ref: '#/components/schemas/PatchedAdminLeaderboardRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/PatchedAdminLeaderboard'
+              $ref: '#/components/schemas/PatchedAdminLeaderboardRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/PatchedAdminLeaderboard'
+              $ref: '#/components/schemas/PatchedAdminLeaderboardRequest'
       security:
       - jwtAuth: []
       responses:
@@ -401,13 +401,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/AdminTournament'
+              $ref: '#/components/schemas/AdminTournamentRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/AdminTournament'
+              $ref: '#/components/schemas/AdminTournamentRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/AdminTournament'
+              $ref: '#/components/schemas/AdminTournamentRequest'
         required: true
       security:
       - jwtAuth: []
@@ -456,13 +456,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/AdminTournament'
+              $ref: '#/components/schemas/AdminTournamentRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/AdminTournament'
+              $ref: '#/components/schemas/AdminTournamentRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/AdminTournament'
+              $ref: '#/components/schemas/AdminTournamentRequest'
         required: true
       security:
       - jwtAuth: []
@@ -489,13 +489,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PatchedAdminTournament'
+              $ref: '#/components/schemas/PatchedAdminTournamentRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/PatchedAdminTournament'
+              $ref: '#/components/schemas/PatchedAdminTournamentRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/PatchedAdminTournament'
+              $ref: '#/components/schemas/PatchedAdminTournamentRequest'
       security:
       - jwtAuth: []
       responses:
@@ -579,13 +579,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PatchedAdminTournament'
+              $ref: '#/components/schemas/PatchedAdminTournamentRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/PatchedAdminTournament'
+              $ref: '#/components/schemas/PatchedAdminTournamentRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/PatchedAdminTournament'
+              $ref: '#/components/schemas/PatchedAdminTournamentRequest'
       security:
       - jwtAuth: []
       responses:
@@ -612,13 +612,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PatchedAdminTournament'
+              $ref: '#/components/schemas/PatchedAdminTournamentRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/PatchedAdminTournament'
+              $ref: '#/components/schemas/PatchedAdminTournamentRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/PatchedAdminTournament'
+              $ref: '#/components/schemas/PatchedAdminTournamentRequest'
       security:
       - jwtAuth: []
       responses:
@@ -685,13 +685,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/AdminUser'
+              $ref: '#/components/schemas/AdminUserRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/AdminUser'
+              $ref: '#/components/schemas/AdminUserRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/AdminUser'
+              $ref: '#/components/schemas/AdminUserRequest'
       security:
       - jwtAuth: []
       responses:
@@ -739,13 +739,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/AdminUser'
+              $ref: '#/components/schemas/AdminUserRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/AdminUser'
+              $ref: '#/components/schemas/AdminUserRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/AdminUser'
+              $ref: '#/components/schemas/AdminUserRequest'
       security:
       - jwtAuth: []
       responses:
@@ -771,13 +771,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PatchedAdminUser'
+              $ref: '#/components/schemas/PatchedAdminUserRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/PatchedAdminUser'
+              $ref: '#/components/schemas/PatchedAdminUserRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/PatchedAdminUser'
+              $ref: '#/components/schemas/PatchedAdminUserRequest'
       security:
       - jwtAuth: []
       responses:
@@ -839,13 +839,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PatchedAdminUser'
+              $ref: '#/components/schemas/PatchedAdminUserRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/PatchedAdminUser'
+              $ref: '#/components/schemas/PatchedAdminUserRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/PatchedAdminUser'
+              $ref: '#/components/schemas/PatchedAdminUserRequest'
       security:
       - jwtAuth: []
       responses:
@@ -872,13 +872,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/AdminUser'
+              $ref: '#/components/schemas/AdminUserRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/AdminUser'
+              $ref: '#/components/schemas/AdminUserRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/AdminUser'
+              $ref: '#/components/schemas/AdminUserRequest'
       security:
       - jwtAuth: []
       responses:
@@ -887,255 +887,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AdminUser'
-          description: ''
-  /api/admin/users/access-codes/:
-    get:
-      operationId: admin_users_access_codes_list
-      parameters:
-      - in: query
-        name: is_consumed
-        schema:
-          type: boolean
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      - name: search
-        required: false
-        in: query
-        description: A search term.
-        schema:
-          type: string
-      tags:
-      - admin
-      security:
-      - jwtAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PaginatedAdminUserAccessCodeList'
-          description: ''
-    post:
-      operationId: admin_users_access_codes_create
-      tags:
-      - admin
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AdminUserAccessCode'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/AdminUserAccessCode'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/AdminUserAccessCode'
-        required: true
-      security:
-      - jwtAuth: []
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AdminUserAccessCode'
-          description: ''
-  /api/admin/users/access-codes/{id}/:
-    get:
-      operationId: admin_users_access_codes_retrieve
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: string
-          format: uuid
-        description: A UUID string identifying this access code.
-        required: true
-      tags:
-      - admin
-      security:
-      - jwtAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AdminUserAccessCode'
-          description: ''
-    put:
-      operationId: admin_users_access_codes_update
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: string
-          format: uuid
-        description: A UUID string identifying this access code.
-        required: true
-      tags:
-      - admin
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AdminUserAccessCode'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/AdminUserAccessCode'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/AdminUserAccessCode'
-        required: true
-      security:
-      - jwtAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AdminUserAccessCode'
-          description: ''
-    patch:
-      operationId: admin_users_access_codes_partial_update
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: string
-          format: uuid
-        description: A UUID string identifying this access code.
-        required: true
-      tags:
-      - admin
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PatchedAdminUserAccessCode'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/PatchedAdminUserAccessCode'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/PatchedAdminUserAccessCode'
-      security:
-      - jwtAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AdminUserAccessCode'
-          description: ''
-    delete:
-      operationId: admin_users_access_codes_destroy
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: string
-          format: uuid
-        description: A UUID string identifying this access code.
-        required: true
-      tags:
-      - admin
-      security:
-      - jwtAuth: []
-      responses:
-        '204':
-          description: No response body
-  /api/admin/users/access-codes/{id}/update_validation/:
-    patch:
-      operationId: admin_users_access_codes_update_validation_partial_update
-      description: Update validation duration for a specific code.
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: string
-          format: uuid
-        description: A UUID string identifying this access code.
-        required: true
-      tags:
-      - admin
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PatchedAdminUserAccessCode'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/PatchedAdminUserAccessCode'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/PatchedAdminUserAccessCode'
-      security:
-      - jwtAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AdminUserAccessCode'
-          description: ''
-  /api/admin/users/access-codes/bulk_generate/:
-    post:
-      operationId: admin_users_access_codes_bulk_generate_create
-      tags:
-      - admin
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AdminUserAccessCode'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/AdminUserAccessCode'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/AdminUserAccessCode'
-        required: true
-      security:
-      - jwtAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AdminUserAccessCode'
-          description: ''
-  /api/admin/users/access-codes/fetch-shopify/:
-    post:
-      operationId: admin_users_access_codes_fetch_shopify_create
-      description: |-
-        Placeholder for fetching codes from Shopify.
-        Currently mocks the process.
-      tags:
-      - admin
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AdminUserAccessCode'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/AdminUserAccessCode'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/AdminUserAccessCode'
-        required: true
-      security:
-      - jwtAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AdminUserAccessCode'
           description: ''
   /api/admin/videos/:
     get:
@@ -1156,7 +907,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedAdminTrainingVideoList'
+                $ref: '#/components/schemas/PaginatedAdminTrainingSessionList'
           description: ''
     post:
       operationId: admin_videos_create
@@ -1164,16 +915,33 @@ paths:
       - admin
       requestBody:
         content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AdminTrainingVideo'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/AdminTrainingVideo'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/AdminTrainingVideo'
-        required: true
+              type: object
+              properties:
+                Select_category:
+                  type: string
+                Title:
+                  type: string
+                Subtitle:
+                  type: string
+                Equipment_used:
+                  type: string
+                Steps:
+                  type: string
+                Time:
+                  type: string
+                Points:
+                  type: integer
+                video:
+                  type: string
+                  format: binary
+                is_pulished:
+                  type: boolean
+              required:
+              - Select_category
+              - Title
+              - Time
       security:
       - jwtAuth: []
       responses:
@@ -1181,7 +949,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AdminTrainingVideo'
+                $ref: '#/components/schemas/AdminTrainingSession'
           description: ''
   /api/admin/videos/{id}/:
     get:
@@ -1192,7 +960,7 @@ paths:
         schema:
           type: string
           format: uuid
-        description: A UUID string identifying this training video.
+        description: A UUID string identifying this training session.
         required: true
       tags:
       - admin
@@ -1203,7 +971,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AdminTrainingVideo'
+                $ref: '#/components/schemas/AdminTrainingSession'
           description: ''
     put:
       operationId: admin_videos_update
@@ -1213,22 +981,39 @@ paths:
         schema:
           type: string
           format: uuid
-        description: A UUID string identifying this training video.
+        description: A UUID string identifying this training session.
         required: true
       tags:
       - admin
       requestBody:
         content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AdminTrainingVideo'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/AdminTrainingVideo'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/AdminTrainingVideo'
-        required: true
+              type: object
+              properties:
+                Select_category:
+                  type: string
+                Title:
+                  type: string
+                Subtitle:
+                  type: string
+                Equipment_used:
+                  type: string
+                Steps:
+                  type: string
+                Time:
+                  type: string
+                Points:
+                  type: integer
+                video:
+                  type: string
+                  format: binary
+                is_pulished:
+                  type: boolean
+              required:
+              - Select_category
+              - Title
+              - Time
       security:
       - jwtAuth: []
       responses:
@@ -1236,7 +1021,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AdminTrainingVideo'
+                $ref: '#/components/schemas/AdminTrainingSession'
           description: ''
     patch:
       operationId: admin_videos_partial_update
@@ -1246,21 +1031,39 @@ paths:
         schema:
           type: string
           format: uuid
-        description: A UUID string identifying this training video.
+        description: A UUID string identifying this training session.
         required: true
       tags:
       - admin
       requestBody:
         content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PatchedAdminTrainingVideo'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/PatchedAdminTrainingVideo'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/PatchedAdminTrainingVideo'
+              type: object
+              properties:
+                Select_category:
+                  type: string
+                Title:
+                  type: string
+                Subtitle:
+                  type: string
+                Equipment_used:
+                  type: string
+                Steps:
+                  type: string
+                Time:
+                  type: string
+                Points:
+                  type: integer
+                video:
+                  type: string
+                  format: binary
+                is_pulished:
+                  type: boolean
+              required:
+              - Select_category
+              - Title
+              - Time
       security:
       - jwtAuth: []
       responses:
@@ -1268,7 +1071,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AdminTrainingVideo'
+                $ref: '#/components/schemas/AdminTrainingSession'
           description: ''
     delete:
       operationId: admin_videos_destroy
@@ -1278,7 +1081,7 @@ paths:
         schema:
           type: string
           format: uuid
-        description: A UUID string identifying this training video.
+        description: A UUID string identifying this training session.
         required: true
       tags:
       - admin
@@ -1287,6 +1090,57 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/admin/videos/{id}/publish/:
+    patch:
+      operationId: admin_videos_publish_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this training session.
+        required: true
+      tags:
+      - admin
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                Select_category:
+                  type: string
+                Title:
+                  type: string
+                Subtitle:
+                  type: string
+                Equipment_used:
+                  type: string
+                Steps:
+                  type: string
+                Time:
+                  type: string
+                Points:
+                  type: integer
+                video:
+                  type: string
+                  format: binary
+                is_pulished:
+                  type: boolean
+              required:
+              - Select_category
+              - Title
+              - Time
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminTrainingSession'
+          description: ''
   /api/admin/videos/categories/:
     get:
       operationId: admin_videos_categories_list
@@ -1316,13 +1170,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/AdminTrainingCategory'
+              $ref: '#/components/schemas/AdminTrainingCategoryRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/AdminTrainingCategory'
+              $ref: '#/components/schemas/AdminTrainingCategoryRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/AdminTrainingCategory'
+              $ref: '#/components/schemas/AdminTrainingCategoryRequest'
         required: true
       security:
       - jwtAuth: []
@@ -1371,13 +1225,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/AdminTrainingCategory'
+              $ref: '#/components/schemas/AdminTrainingCategoryRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/AdminTrainingCategory'
+              $ref: '#/components/schemas/AdminTrainingCategoryRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/AdminTrainingCategory'
+              $ref: '#/components/schemas/AdminTrainingCategoryRequest'
         required: true
       security:
       - jwtAuth: []
@@ -1404,13 +1258,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PatchedAdminTrainingCategory'
+              $ref: '#/components/schemas/PatchedAdminTrainingCategoryRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/PatchedAdminTrainingCategory'
+              $ref: '#/components/schemas/PatchedAdminTrainingCategoryRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/PatchedAdminTrainingCategory'
+              $ref: '#/components/schemas/PatchedAdminTrainingCategoryRequest'
       security:
       - jwtAuth: []
       responses:
@@ -1437,265 +1291,6 @@ paths:
       responses:
         '204':
           description: No response body
-  /api/admin/videos/moderation/:
-    get:
-      operationId: admin_videos_moderation_list
-      parameters:
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      tags:
-      - admin
-      security:
-      - jwtAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PaginatedAdminModerationList'
-          description: ''
-  /api/admin/videos/moderation/{id}/:
-    get:
-      operationId: admin_videos_moderation_retrieve
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: string
-          format: uuid
-        description: A UUID string identifying this session.
-        required: true
-      tags:
-      - admin
-      security:
-      - jwtAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AdminModeration'
-          description: ''
-  /api/admin/videos/moderation/{id}/toggle_leaderboard/:
-    post:
-      operationId: admin_videos_moderation_toggle_leaderboard_create
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: string
-          format: uuid
-        description: A UUID string identifying this session.
-        required: true
-      tags:
-      - admin
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AdminModeration'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/AdminModeration'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/AdminModeration'
-      security:
-      - jwtAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AdminModeration'
-          description: ''
-  /api/admin/videos/sessions/:
-    get:
-      operationId: admin_videos_sessions_list
-      parameters:
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      tags:
-      - admin
-      security:
-      - jwtAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PaginatedAdminTrainingSessionList'
-          description: ''
-    post:
-      operationId: admin_videos_sessions_create
-      tags:
-      - admin
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AdminTrainingSession'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/AdminTrainingSession'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/AdminTrainingSession'
-        required: true
-      security:
-      - jwtAuth: []
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AdminTrainingSession'
-          description: ''
-  /api/admin/videos/sessions/{id}/:
-    get:
-      operationId: admin_videos_sessions_retrieve
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: string
-          format: uuid
-        description: A UUID string identifying this training session.
-        required: true
-      tags:
-      - admin
-      security:
-      - jwtAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AdminTrainingSession'
-          description: ''
-    put:
-      operationId: admin_videos_sessions_update
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: string
-          format: uuid
-        description: A UUID string identifying this training session.
-        required: true
-      tags:
-      - admin
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AdminTrainingSession'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/AdminTrainingSession'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/AdminTrainingSession'
-        required: true
-      security:
-      - jwtAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AdminTrainingSession'
-          description: ''
-    patch:
-      operationId: admin_videos_sessions_partial_update
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: string
-          format: uuid
-        description: A UUID string identifying this training session.
-        required: true
-      tags:
-      - admin
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PatchedAdminTrainingSession'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/PatchedAdminTrainingSession'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/PatchedAdminTrainingSession'
-      security:
-      - jwtAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AdminTrainingSession'
-          description: ''
-    delete:
-      operationId: admin_videos_sessions_destroy
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: string
-          format: uuid
-        description: A UUID string identifying this training session.
-        required: true
-      tags:
-      - admin
-      security:
-      - jwtAuth: []
-      responses:
-        '204':
-          description: No response body
-  /api/admin/videos/sessions/{id}/publish/:
-    patch:
-      operationId: admin_videos_sessions_publish_partial_update
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: string
-          format: uuid
-        description: A UUID string identifying this training session.
-        required: true
-      tags:
-      - admin
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PatchedAdminTrainingSession'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/PatchedAdminTrainingSession'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/PatchedAdminTrainingSession'
-      security:
-      - jwtAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AdminTrainingSession'
-          description: ''
   /api/auth/login/:
     post:
       operationId: auth_login_create
@@ -1705,13 +1300,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Login'
+              $ref: '#/components/schemas/LoginRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/Login'
+              $ref: '#/components/schemas/LoginRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/Login'
+              $ref: '#/components/schemas/LoginRequest'
         required: true
       security:
       - jwtAuth: []
@@ -1745,13 +1340,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/TokenRefresh'
+              $ref: '#/components/schemas/TokenRefreshRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/TokenRefresh'
+              $ref: '#/components/schemas/TokenRefreshRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/TokenRefresh'
+              $ref: '#/components/schemas/TokenRefreshRequest'
         required: true
       responses:
         '200':
@@ -1767,15 +1362,12 @@ paths:
       - auth
       requestBody:
         content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Register'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/Register'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/Register'
+              $ref: '#/components/schemas/RegisterRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
         required: true
       security:
       - jwtAuth: []
@@ -1806,13 +1398,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Follow'
+              $ref: '#/components/schemas/FollowRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/Follow'
+              $ref: '#/components/schemas/FollowRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/Follow'
+              $ref: '#/components/schemas/FollowRequest'
         required: true
       security:
       - jwtAuth: []
@@ -1958,6 +1550,37 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedTournamentParticipationList'
           description: ''
+  /api/notifications/register-device/:
+    post:
+      operationId: notifications_register_device_create
+      description: Register a Firebase Cloud Messaging device token to allow the backend
+        to send push notifications. The token can be associated with an authenticated
+        user or anonymous. If a token already exists, it will be updated.
+      summary: Register FCM Device Token
+      tags:
+      - Notifications
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FCMDeviceRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/FCMDeviceRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/FCMDeviceRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FCMDevice'
+          description: ''
   /api/sessions/{id}/share/:
     put:
       operationId: sessions_share_update
@@ -1973,13 +1596,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SessionShareToggle'
+              $ref: '#/components/schemas/SessionShareToggleRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/SessionShareToggle'
+              $ref: '#/components/schemas/SessionShareToggleRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/SessionShareToggle'
+              $ref: '#/components/schemas/SessionShareToggleRequest'
         required: true
       security:
       - jwtAuth: []
@@ -2004,13 +1627,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PatchedSessionShareToggle'
+              $ref: '#/components/schemas/PatchedSessionShareToggleRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/PatchedSessionShareToggle'
+              $ref: '#/components/schemas/PatchedSessionShareToggleRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/PatchedSessionShareToggle'
+              $ref: '#/components/schemas/PatchedSessionShareToggleRequest'
       security:
       - jwtAuth: []
       responses:
@@ -2029,13 +1652,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SessionComplete'
+              $ref: '#/components/schemas/SessionCompleteRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/SessionComplete'
+              $ref: '#/components/schemas/SessionCompleteRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/SessionComplete'
+              $ref: '#/components/schemas/SessionCompleteRequest'
         required: true
       security:
       - jwtAuth: []
@@ -2076,10 +1699,10 @@ paths:
         content:
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/User'
+              $ref: '#/components/schemas/UserRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/User'
+              $ref: '#/components/schemas/UserRequest'
       security:
       - jwtAuth: []
       responses:
@@ -2097,10 +1720,10 @@ paths:
         content:
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/PatchedUser'
+              $ref: '#/components/schemas/PatchedUserRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/PatchedUser'
+              $ref: '#/components/schemas/PatchedUserRequest'
       security:
       - jwtAuth: []
       responses:
@@ -2110,32 +1733,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/User'
           description: ''
-  /api/stats/country/{country_name}/:
-    get:
-      operationId: stats_country_retrieve
-      parameters:
-      - in: path
-        name: country_name
-        schema:
-          type: string
-        required: true
-      tags:
-      - stats
-      security:
-      - jwtAuth: []
-      responses:
-        '200':
-          description: No response body
-  /api/stats/global/:
-    get:
-      operationId: stats_global_retrieve
-      tags:
-      - stats
-      security:
-      - jwtAuth: []
-      responses:
-        '200':
-          description: No response body
   /api/stats/leaderboard/:
     get:
       operationId: stats_leaderboard_retrieve
@@ -2145,16 +1742,6 @@ paths:
         schema:
           type: string
         description: Filter type (everyone, germany, following)
-      - in: query
-        name: month
-        schema:
-          type: integer
-        description: Month (1-12)
-      - in: query
-        name: year
-        schema:
-          type: integer
-        description: Year
       tags:
       - stats
       security:
@@ -2175,13 +1762,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PerformanceAIRequest'
+              $ref: '#/components/schemas/PerformanceAIRequestRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/PerformanceAIRequest'
+              $ref: '#/components/schemas/PerformanceAIRequestRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/PerformanceAIRequest'
+              $ref: '#/components/schemas/PerformanceAIRequestRequest'
         required: true
       security:
       - jwtAuth: []
@@ -2191,35 +1778,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PerformanceAIRequest'
-          description: ''
-  /api/stats/users/:
-    get:
-      operationId: stats_users_list
-      parameters:
-      - in: query
-        name: country
-        schema:
-          type: string
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      - in: query
-        name: position
-        schema:
-          type: string
-      tags:
-      - stats
-      security:
-      - jwtAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PaginatedUserList'
           description: ''
   /api/tournaments/:
     get:
@@ -2249,7 +1807,8 @@ paths:
       - in: path
         name: id
         schema:
-          type: integer
+          type: string
+          format: uuid
         required: true
       tags:
       - tournaments
@@ -2269,7 +1828,8 @@ paths:
       - in: path
         name: id
         schema:
-          type: integer
+          type: string
+          format: uuid
         required: true
       tags:
       - tournaments
@@ -2277,7 +1837,11 @@ paths:
       - jwtAuth: []
       responses:
         '200':
-          description: No response body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TournamentParticipation'
+          description: ''
   /api/tournaments/{id}/leaderboard/:
     get:
       operationId: tournaments_leaderboard_list
@@ -2285,7 +1849,8 @@ paths:
       - in: path
         name: id
         schema:
-          type: integer
+          type: string
+          format: uuid
         required: true
       - name: page
         required: false
@@ -2304,37 +1869,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedTournamentParticipationList'
           description: ''
-  /api/trainings/:
-    get:
-      operationId: trainings_list
-      parameters:
-      - in: query
-        name: category
-        schema:
-          type: string
-          format: uuid
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      - in: query
-        name: session
-        schema:
-          type: string
-          format: uuid
-      tags:
-      - trainings
-      security:
-      - jwtAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PaginatedTrainingVideoList'
-          description: ''
   /api/trainings/{id}/complete/:
     post:
       operationId: trainings_complete_create
@@ -2342,7 +1876,8 @@ paths:
       - in: path
         name: id
         schema:
-          type: integer
+          type: string
+          format: uuid
         required: true
       tags:
       - trainings
@@ -2350,13 +1885,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CompleteTrainingRequest'
+              $ref: '#/components/schemas/CompleteTrainingRequestRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/CompleteTrainingRequest'
+              $ref: '#/components/schemas/CompleteTrainingRequestRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/CompleteTrainingRequest'
+              $ref: '#/components/schemas/CompleteTrainingRequestRequest'
       security:
       - jwtAuth: []
       responses:
@@ -2364,12 +1899,17 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CompleteTrainingRequest'
+                $ref: '#/components/schemas/TrainingCompletion'
           description: ''
   /api/trainings/sessions/:
     get:
       operationId: trainings_sessions_list
       parameters:
+      - in: query
+        name: category
+        schema:
+          type: string
+          format: uuid
       - name: page
         required: false
         in: query
@@ -2489,54 +2029,22 @@ components:
         email:
           type: string
           format: email
+      required:
+      - email
+    AdminLoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
         password:
           type: string
           writeOnly: true
+          minLength: 1
       required:
       - email
       - password
-    AdminModeration:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          readOnly: true
-        user:
-          type: string
-          format: uuid
-          readOnly: true
-        user_name:
-          type: string
-          readOnly: true
-        total_kick:
-          type: integer
-          readOnly: true
-        video_file:
-          type: string
-          format: uri
-          readOnly: true
-          nullable: true
-        mode:
-          allOf:
-          - $ref: '#/components/schemas/ModeEnum'
-          readOnly: true
-        is_story:
-          type: boolean
-        is_shared_to_leaderboard:
-          type: boolean
-        created_at:
-          type: string
-          format: date-time
-          readOnly: true
-      required:
-      - created_at
-      - id
-      - mode
-      - total_kick
-      - user
-      - user_name
-      - video_file
     AdminOverview:
       type: object
       properties:
@@ -2567,12 +2075,13 @@ components:
       - total_tournaments
       - total_users
       - total_videos
-    AdminPasswordReset:
+    AdminPasswordResetRequest:
       type: object
       properties:
         old_password:
           type: string
           writeOnly: true
+          minLength: 1
         new_password:
           type: string
           writeOnly: true
@@ -2625,6 +2134,38 @@ components:
       - id
       - participant_count
       - title
+    AdminTournamentRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 255
+        description:
+          type: string
+        start_date:
+          type: string
+          format: date-time
+          nullable: true
+        end_date:
+          type: string
+          format: date-time
+          nullable: true
+        product_purchase_link:
+          type: string
+          format: uri
+          nullable: true
+          maxLength: 500
+        prize_money:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        is_free:
+          type: boolean
+        is_active:
+          type: boolean
+      required:
+      - title
     AdminTrainingCategory:
       type: object
       properties:
@@ -2647,109 +2188,62 @@ components:
       - created_at
       - id
       - title
+    AdminTrainingCategoryRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 100
+        description:
+          type: string
+        is_active:
+          type: boolean
+      required:
+      - title
     AdminTrainingSession:
       type: object
+      description: |-
+        Serializer for creating/managing Training Sessions with simplified
+        field names as requested by the user.
       properties:
         id:
           type: string
           format: uuid
           readOnly: true
-        category:
+        Select_category:
           type: string
-          format: uuid
-          nullable: true
-        title:
+        Title:
           type: string
-          maxLength: 255
-        description:
+        Subtitle:
           type: string
-        equipment_used:
+        Equipment_used:
           type: string
-        steps:
+        Steps:
           type: string
-        video_file:
+        Time:
+          type: string
+          description: Duration (e.g., '10:00')
+        Points:
+          type: integer
+          default: 0
+        video:
           type: string
           format: uri
           nullable: true
-        time_minutes:
-          type: integer
-          maximum: 9223372036854775807
-          minimum: -9223372036854775808
-          format: int64
-        points:
-          type: integer
-          maximum: 9223372036854775807
-          minimum: -9223372036854775808
-          format: int64
-        is_published:
+        is_pulished:
           type: boolean
-        video_count:
-          type: integer
-          readOnly: true
+          default: false
         created_at:
           type: string
           format: date-time
           readOnly: true
       required:
+      - Select_category
+      - Time
+      - Title
       - created_at
       - id
-      - title
-      - video_count
-    AdminTrainingVideo:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          readOnly: true
-        title:
-          type: string
-          maxLength: 255
-        category:
-          type: string
-          format: uuid
-        category_name:
-          type: string
-          readOnly: true
-        session:
-          type: string
-          format: uuid
-          nullable: true
-        session_title:
-          type: string
-          readOnly: true
-        video_url:
-          type: string
-          format: uri
-          nullable: true
-          maxLength: 200
-        video_file:
-          type: string
-          format: uri
-          nullable: true
-        score_required:
-          type: integer
-          maximum: 9223372036854775807
-          minimum: -9223372036854775808
-          format: int64
-        duration_time:
-          type: integer
-          maximum: 9223372036854775807
-          minimum: -9223372036854775808
-          format: int64
-        points:
-          type: integer
-          maximum: 9223372036854775807
-          minimum: -9223372036854775808
-          format: int64
-        is_active:
-          type: boolean
-      required:
-      - category
-      - category_name
-      - id
-      - session_title
-      - title
     AdminUser:
       type: object
       properties:
@@ -2804,60 +2298,49 @@ components:
       required:
       - date_joined
       - id
-    AdminUserAccessCode:
+    AdminUserRequest:
       type: object
       properties:
-        id:
+        name:
           type: string
-          format: uuid
-          readOnly: true
-        code:
+          nullable: true
+          maxLength: 255
+        email:
           type: string
+          format: email
+          nullable: true
+          maxLength: 254
+        access_code:
+          type: string
+          nullable: true
           maxLength: 100
-        duration_months:
+        country:
+          type: string
+          nullable: true
+          maxLength: 100
+        position:
+          type: string
+          nullable: true
+          maxLength: 50
+        total_kicks:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        points:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        streak:
           type: integer
           maximum: 9223372036854775807
           minimum: -9223372036854775808
           format: int64
         is_active:
           type: boolean
-        is_consumed:
+        is_staff:
           type: boolean
-        consumed_at:
-          type: string
-          format: date-time
-          readOnly: true
-          nullable: true
-        expires_at:
-          type: string
-          format: date-time
-          readOnly: true
-          nullable: true
-        user:
-          type: string
-          format: uuid
-          readOnly: true
-          nullable: true
-        user_name:
-          type: string
-          readOnly: true
-        created_at:
-          type: string
-          format: date-time
-          readOnly: true
-        updated_at:
-          type: string
-          format: date-time
-          readOnly: true
-      required:
-      - code
-      - consumed_at
-      - created_at
-      - expires_at
-      - id
-      - updated_at
-      - user
-      - user_name
     CombinedActivity:
       type: object
       properties:
@@ -2878,7 +2361,7 @@ components:
       - details
       - type
       - user
-    CompleteTrainingRequest:
+    CompleteTrainingRequestRequest:
       type: object
       properties:
         score_achieved:
@@ -2897,6 +2380,7 @@ components:
           maxLength: 255
         profile_image:
           type: string
+          format: uri
           nullable: true
         country:
           type: string
@@ -2912,10 +2396,8 @@ components:
           minimum: -9223372036854775808
           format: int64
         rank:
-          type: integer
-          maximum: 9223372036854775807
-          minimum: -9223372036854775808
-          format: int64
+          type: string
+          readOnly: true
         streak:
           type: integer
           maximum: 9223372036854775807
@@ -2928,6 +2410,38 @@ components:
           format: int64
       required:
       - id
+      - rank
+    FCMDevice:
+      type: object
+      properties:
+        registration_id:
+          type: string
+          maxLength: 255
+        device_type:
+          type: string
+          nullable: true
+          description: e.g., ios, android, web
+          maxLength: 50
+        is_active:
+          type: boolean
+      required:
+      - registration_id
+    FCMDeviceRequest:
+      type: object
+      properties:
+        registration_id:
+          type: string
+          minLength: 1
+          maxLength: 255
+        device_type:
+          type: string
+          nullable: true
+          description: e.g., ios, android, web
+          maxLength: 50
+        is_active:
+          type: boolean
+      required:
+      - registration_id
     Follow:
       type: object
       properties:
@@ -2938,6 +2452,7 @@ components:
         follower:
           type: string
           format: uuid
+          readOnly: true
         following:
           type: string
           format: uuid
@@ -2950,17 +2465,53 @@ components:
       - follower
       - following
       - id
+    FollowRequest:
+      type: object
+      properties:
+        following:
+          type: string
+          format: uuid
+      required:
+      - following
+    ForgotPassword:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+      required:
+      - email
+    ForgotPasswordRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+      required:
+      - email
+    LeaderboardData:
+      type: object
+      properties:
+        top_11:
+          type: array
+          items:
+            $ref: '#/components/schemas/LeaderboardPlayer'
+      required:
+      - top_11
     LeaderboardPlayer:
       type: object
       properties:
+        id:
+          type: string
+          format: uuid
         rank:
           type: integer
         name:
           type: string
           nullable: true
-        profile_image:
+        avatar:
           type: string
-          format: uri
           nullable: true
         total_kicks:
           type: integer
@@ -2969,9 +2520,10 @@ components:
         streak:
           type: integer
       required:
+      - avatar
+      - id
       - name
       - points
-      - profile_image
       - rank
       - streak
       - total_kicks
@@ -2981,20 +2533,23 @@ components:
         success:
           type: boolean
         data:
-          type: array
-          items:
-            $ref: '#/components/schemas/LeaderboardPlayer'
-        message:
-          type: string
+          $ref: '#/components/schemas/LeaderboardData'
       required:
       - data
-      - message
       - success
     Login:
       type: object
       properties:
         access_code:
           type: string
+      required:
+      - access_code
+    LoginRequest:
+      type: object
+      properties:
+        access_code:
+          type: string
+          minLength: 1
       required:
       - access_code
     ModeEnum:
@@ -3028,29 +2583,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/AdminAccessCodeDetail'
-    PaginatedAdminModerationList:
-      type: object
-      required:
-      - count
-      - results
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/AdminModeration'
     PaginatedAdminTournamentList:
       type: object
       required:
@@ -3120,52 +2652,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/AdminTrainingSession'
-    PaginatedAdminTrainingVideoList:
-      type: object
-      required:
-      - count
-      - results
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/AdminTrainingVideo'
-    PaginatedAdminUserAccessCodeList:
-      type: object
-      required:
-      - count
-      - results
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/AdminUserAccessCode'
     PaginatedAdminUserList:
       type: object
       required:
@@ -3304,29 +2790,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/TrainingSession'
-    PaginatedTrainingVideoList:
-      type: object
-      required:
-      - count
-      - results
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/TrainingVideo'
     PaginatedUserList:
       type: object
       required:
@@ -3350,15 +2813,12 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/User'
-    PatchedAdminAccessCodeDetail:
+    PatchedAdminAccessCodeDetailRequest:
       type: object
       properties:
-        id:
-          type: string
-          format: uuid
-          readOnly: true
         code:
           type: string
+          minLength: 1
           maxLength: 100
         duration_months:
           type: integer
@@ -3381,23 +2841,9 @@ components:
           type: string
           format: uuid
           nullable: true
-        user_name:
-          type: string
-          readOnly: true
-        created_at:
-          type: string
-          format: date-time
-          readOnly: true
-    PatchedAdminLeaderboard:
+    PatchedAdminLeaderboardRequest:
       type: object
       properties:
-        id:
-          type: string
-          format: uuid
-          readOnly: true
-        user_name:
-          type: string
-          readOnly: true
         total_kicks:
           type: integer
           maximum: 9223372036854775807
@@ -3417,15 +2863,12 @@ components:
           type: string
           nullable: true
           maxLength: 100
-    PatchedAdminTournament:
+    PatchedAdminTournamentRequest:
       type: object
       properties:
-        id:
-          type: string
-          format: uuid
-          readOnly: true
         title:
           type: string
+          minLength: 1
           maxLength: 255
         description:
           type: string
@@ -3450,130 +2893,20 @@ components:
           type: boolean
         is_active:
           type: boolean
-        participant_count:
-          type: integer
-          readOnly: true
-        created_at:
-          type: string
-          format: date-time
-          readOnly: true
-    PatchedAdminTrainingCategory:
+    PatchedAdminTrainingCategoryRequest:
       type: object
       properties:
-        id:
-          type: string
-          format: uuid
-          readOnly: true
         title:
           type: string
+          minLength: 1
           maxLength: 100
         description:
           type: string
         is_active:
           type: boolean
-        created_at:
-          type: string
-          format: date-time
-          readOnly: true
-    PatchedAdminTrainingSession:
+    PatchedAdminUserRequest:
       type: object
       properties:
-        id:
-          type: string
-          format: uuid
-          readOnly: true
-        category:
-          type: string
-          format: uuid
-          nullable: true
-        title:
-          type: string
-          maxLength: 255
-        description:
-          type: string
-        equipment_used:
-          type: string
-        steps:
-          type: string
-        video_file:
-          type: string
-          format: uri
-          nullable: true
-        time_minutes:
-          type: integer
-          maximum: 9223372036854775807
-          minimum: -9223372036854775808
-          format: int64
-        points:
-          type: integer
-          maximum: 9223372036854775807
-          minimum: -9223372036854775808
-          format: int64
-        is_published:
-          type: boolean
-        video_count:
-          type: integer
-          readOnly: true
-        created_at:
-          type: string
-          format: date-time
-          readOnly: true
-    PatchedAdminTrainingVideo:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          readOnly: true
-        title:
-          type: string
-          maxLength: 255
-        category:
-          type: string
-          format: uuid
-        category_name:
-          type: string
-          readOnly: true
-        session:
-          type: string
-          format: uuid
-          nullable: true
-        session_title:
-          type: string
-          readOnly: true
-        video_url:
-          type: string
-          format: uri
-          nullable: true
-          maxLength: 200
-        video_file:
-          type: string
-          format: uri
-          nullable: true
-        score_required:
-          type: integer
-          maximum: 9223372036854775807
-          minimum: -9223372036854775808
-          format: int64
-        duration_time:
-          type: integer
-          maximum: 9223372036854775807
-          minimum: -9223372036854775808
-          format: int64
-        points:
-          type: integer
-          maximum: 9223372036854775807
-          minimum: -9223372036854775808
-          format: int64
-        is_active:
-          type: boolean
-    PatchedAdminUser:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          readOnly: true
         name:
           type: string
           nullable: true
@@ -3614,75 +2947,23 @@ components:
           type: boolean
         is_staff:
           type: boolean
-        date_joined:
-          type: string
-          format: date-time
-          readOnly: true
-    PatchedAdminUserAccessCode:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          readOnly: true
-        code:
-          type: string
-          maxLength: 100
-        duration_months:
-          type: integer
-          maximum: 9223372036854775807
-          minimum: -9223372036854775808
-          format: int64
-        is_active:
-          type: boolean
-        is_consumed:
-          type: boolean
-        consumed_at:
-          type: string
-          format: date-time
-          readOnly: true
-          nullable: true
-        expires_at:
-          type: string
-          format: date-time
-          readOnly: true
-          nullable: true
-        user:
-          type: string
-          format: uuid
-          readOnly: true
-          nullable: true
-        user_name:
-          type: string
-          readOnly: true
-        created_at:
-          type: string
-          format: date-time
-          readOnly: true
-        updated_at:
-          type: string
-          format: date-time
-          readOnly: true
-    PatchedSessionShareToggle:
+    PatchedSessionShareToggleRequest:
       type: object
       properties:
         share_type:
           $ref: '#/components/schemas/ShareTypeEnum'
         state:
           type: boolean
-    PatchedUser:
+    PatchedUserRequest:
       type: object
       properties:
-        id:
-          type: string
-          format: uuid
-          readOnly: true
         name:
           type: string
           nullable: true
           maxLength: 255
         profile_image:
           type: string
+          format: binary
           nullable: true
         country:
           type: string
@@ -3692,28 +2973,35 @@ components:
           type: string
           nullable: true
           maxLength: 50
-        access_code:
-          type: string
-          readOnly: true
-          nullable: true
-        total_kicks:
-          type: integer
-          readOnly: true
-        rank:
-          type: integer
-          readOnly: true
-        points:
-          type: integer
-          readOnly: true
-        streak:
-          type: integer
-          readOnly: true
     PerformanceAIRequest:
       type: object
       description: Matches the AI model response format provided by the user.
       properties:
         status:
           type: string
+        response_code:
+          type: integer
+        video_info:
+          type: object
+          additionalProperties: {}
+        data:
+          type: object
+          additionalProperties: {}
+        session_id:
+          type: string
+          format: uuid
+      required:
+      - data
+      - response_code
+      - status
+      - video_info
+    PerformanceAIRequestRequest:
+      type: object
+      description: Matches the AI model response format provided by the user.
+      properties:
+        status:
+          type: string
+          minLength: 1
         response_code:
           type: integer
         video_info:
@@ -3739,7 +3027,7 @@ components:
           maxLength: 255
         profile_image:
           type: string
-          nullable: true
+          format: uri
         country:
           type: string
           nullable: true
@@ -3750,6 +3038,32 @@ components:
           maxLength: 50
         access_code:
           type: string
+      required:
+      - access_code
+      - country
+      - name
+      - position
+    RegisterRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          nullable: true
+          maxLength: 255
+        profile_image:
+          type: string
+          format: binary
+        country:
+          type: string
+          nullable: true
+          maxLength: 100
+        position:
+          type: string
+          nullable: true
+          maxLength: 50
+        access_code:
+          type: string
+          minLength: 1
       required:
       - access_code
       - country
@@ -3826,6 +3140,33 @@ components:
           default: 3
       required:
       - total_kick
+    SessionCompleteRequest:
+      type: object
+      properties:
+        total_kick:
+          type: integer
+          minimum: 0
+        video_file:
+          type: string
+          format: binary
+        mode:
+          allOf:
+          - $ref: '#/components/schemas/ModeEnum'
+          default: default
+        is_story:
+          type: boolean
+          default: false
+        is_shared_to_leaderboard:
+          type: boolean
+          default: false
+        session_duration:
+          type: integer
+          default: 5
+        countdown_time:
+          type: integer
+          default: 3
+      required:
+      - total_kick
     SessionShareToggle:
       type: object
       properties:
@@ -3836,6 +3177,37 @@ components:
       required:
       - share_type
       - state
+    SessionShareToggleRequest:
+      type: object
+      properties:
+        share_type:
+          $ref: '#/components/schemas/ShareTypeEnum'
+        state:
+          type: boolean
+      required:
+      - share_type
+      - state
+    SetNewPassword:
+      type: object
+      properties:
+        token:
+          type: string
+          format: uuid
+      required:
+      - token
+    SetNewPasswordRequest:
+      type: object
+      properties:
+        token:
+          type: string
+          format: uuid
+        new_password:
+          type: string
+          writeOnly: true
+          minLength: 8
+      required:
+      - new_password
+      - token
     ShareTypeEnum:
       enum:
       - leaderboard
@@ -3850,11 +3222,16 @@ components:
         access:
           type: string
           readOnly: true
+      required:
+      - access
+    TokenRefreshRequest:
+      type: object
+      properties:
         refresh:
           type: string
           writeOnly: true
+          minLength: 1
       required:
-      - access
       - refresh
     Tournament:
       type: object
@@ -3929,20 +3306,31 @@ components:
       - id
       - tournament
       - user
-    TrainingCategory:
+    TrainingCompletion:
       type: object
       properties:
         id:
           type: string
           format: uuid
           readOnly: true
-        title:
-          type: string
-          maxLength: 100
-        description:
-          type: string
-        is_active:
-          type: boolean
+        user:
+          allOf:
+          - $ref: '#/components/schemas/User'
+          readOnly: true
+        training_session:
+          allOf:
+          - $ref: '#/components/schemas/TrainingSession'
+          readOnly: true
+        score_achieved:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        points_awarded:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
         created_at:
           type: string
           format: date-time
@@ -3950,7 +3338,8 @@ components:
       required:
       - created_at
       - id
-      - title
+      - training_session
+      - user
     TrainingSession:
       type: object
       properties:
@@ -3965,6 +3354,9 @@ components:
         title:
           type: string
           maxLength: 255
+        subtitle:
+          type: string
+          maxLength: 255
         description:
           type: string
         equipment_used:
@@ -3975,12 +3367,20 @@ components:
           type: string
           format: uri
           nullable: true
-        time_minutes:
+        video_url:
+          type: string
+          readOnly: true
+        duration_seconds:
           type: integer
           maximum: 9223372036854775807
           minimum: -9223372036854775808
           format: int64
         points:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        score_required:
           type: integer
           maximum: 9223372036854775807
           minimum: -9223372036854775808
@@ -3995,60 +3395,7 @@ components:
       - created_at
       - id
       - title
-    TrainingVideo:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          readOnly: true
-        title:
-          type: string
-          maxLength: 255
-        category:
-          allOf:
-          - $ref: '#/components/schemas/TrainingCategory'
-          readOnly: true
-        session:
-          allOf:
-          - $ref: '#/components/schemas/TrainingSession'
-          readOnly: true
-        video_url:
-          type: string
-          format: uri
-          nullable: true
-          maxLength: 200
-        video_file:
-          type: string
-          format: uri
-          nullable: true
-        score_required:
-          type: integer
-          maximum: 9223372036854775807
-          minimum: -9223372036854775808
-          format: int64
-        duration_time:
-          type: integer
-          maximum: 9223372036854775807
-          minimum: -9223372036854775808
-          format: int64
-        points:
-          type: integer
-          maximum: 9223372036854775807
-          minimum: -9223372036854775808
-          format: int64
-        is_active:
-          type: boolean
-        created_at:
-          type: string
-          format: date-time
-          readOnly: true
-      required:
-      - category
-      - created_at
-      - id
-      - session
-      - title
+      - video_url
     User:
       type: object
       properties:
@@ -4062,6 +3409,7 @@ components:
           maxLength: 255
         profile_image:
           type: string
+          format: uri
           nullable: true
         country:
           type: string
@@ -4079,7 +3427,7 @@ components:
           type: integer
           readOnly: true
         rank:
-          type: integer
+          type: string
           readOnly: true
         points:
           type: integer
@@ -4094,6 +3442,25 @@ components:
       - rank
       - streak
       - total_kicks
+    UserRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          nullable: true
+          maxLength: 255
+        profile_image:
+          type: string
+          format: binary
+          nullable: true
+        country:
+          type: string
+          nullable: true
+          maxLength: 100
+        position:
+          type: string
+          nullable: true
+          maxLength: 50
   securitySchemes:
     jwtAuth:
       type: http

@@ -60,8 +60,11 @@ Once the server is running, visit:
 
 admin@kick360.com
 
-adminpassword123
-12345678
+# Super Admin Credentials
+ADMIN_EMAIL=parvinkona11@gmail.com
+ADMIN_PASSWORD=kona1234
+
+
 
 ### List of Endpoints & Explanations
 

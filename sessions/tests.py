@@ -8,7 +8,7 @@ from unittest.mock import patch, MagicMock
 
 class SessionTests(APITestCase):
     def setUp(self):
-        self.user = User.objects.create_user(access_code="SESSION_CODE", name="Session User", total_kicks=10, points=0, streak=0)
+        self.user = User.objects.create_user(access_code="SES_CODE", name="Session User", total_kicks=10, points=0, streak=0)
         self.client.force_authenticate(user=self.user)
         self.complete_url = reverse('session-complete')
 

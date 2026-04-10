@@ -17,6 +17,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 class RegisterSerializer(serializers.ModelSerializer):
     access_code = serializers.CharField(required=True)
+    profile_image = serializers.ImageField(required=False)
     
     class Meta:
         model = User
@@ -28,21 +29,19 @@ class RegisterSerializer(serializers.ModelSerializer):
         }
 
     def validate_access_code(self, value):
-        if len(value) != 8:
-            raise serializers.ValidationError("Access code must be exactly 8 characters long.")
+        # 1. Verify via external Shopify Service
+        verify_response = ShopifyService.verify_access_code(value)
+        if not verify_response['is_valid']:
+            raise serializers.ValidationError(verify_response['meta'].get('error', 'Invalid access code.'))
             
-        # 1. Check if already consumed locally
-        if AccessCode.objects.filter(code=value, is_consumed=True).exists():
+        # 2. Check if already consumed locally
+        access_code_obj = AccessCode.objects.filter(code=value).first()
+        if access_code_obj and access_code_obj.is_consumed:
             raise serializers.ValidationError("Access code has already been used.")
             
-        # 2. Check if already linked to a user
+        # 3. Check if already linked to a user account
         if User.objects.filter(access_code=value).exists():
             raise serializers.ValidationError("Access code is already linked to an account.")
-            
-        # 3. Verify with Shopify
-        verification = ShopifyService.verify_access_code(value)
-        if not verification['is_valid']:
-            raise serializers.ValidationError("Invalid access code.")
             
         return value
 

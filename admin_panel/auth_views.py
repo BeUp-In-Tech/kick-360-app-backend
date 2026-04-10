@@ -11,8 +11,7 @@ from core.exceptions import APIResponse
 from .permissions import IsAdminRole, AdminLoggerMixin
 from django.conf import settings
 from accounts.models import User, PasswordResetToken
-import sendgrid
-from sendgrid.helpers.mail import Mail
+from django.core.mail import send_mail
 import os
 
 def get_tokens_for_user(user):
@@ -79,19 +78,15 @@ class ForgotPasswordView(generics.GenericAPIView):
             <p>This link will expire in {settings.PASSWORD_RESET_TIMEOUT_MINUTES} minutes</p>
         """
         
-        message = Mail(
-            from_email=getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@kick360.com'),
-            to_emails=email,
-            subject=subject,
-            html_content=html_content
-        )
-        
         try:
-            api_key = os.getenv('SENDGRID_API_KEY')
-            if not api_key:
-                raise ValueError("SENDGRID_API_KEY is not set.")
-            sg = sendgrid.SendGridAPIClient(api_key=api_key)
-            sg.send(message)
+            send_mail(
+                subject=subject,
+                message=f"Please use this link to reset your password: {reset_link}\nThis link will expire in {settings.PASSWORD_RESET_TIMEOUT_MINUTES} minutes.",
+                from_email=getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@kick360.com'),
+                recipient_list=[email],
+                html_message=html_content,
+                fail_silently=False,
+            )
         except Exception as e:
             return Response({"success": False, "message": f"Error sending email: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
