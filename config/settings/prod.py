@@ -6,21 +6,7 @@ ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
 
 CORS_ALLOWED_ORIGINS = os.getenv('CORS_ALLOWED_ORIGINS', '').split(',')
 
-# Update database configuration from DATABASE_URL
-DATABASE_URL = os.getenv('DATABASE_URL')
-if DATABASE_URL:
-    urllib.parse.uses_netloc.append("postgres")
-    url = urllib.parse.urlparse(DATABASE_URL)
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'NAME': url.path[1:],
-            'USER': url.username,
-            'PASSWORD': url.password,
-            'HOST': url.hostname,
-            'PORT': url.port,
-        }
-    }
+# Database configuration is handled in base.py using dj-database-url
 
 # Redis Cache
 REDIS_URL = os.getenv('REDIS_URL', 'redis://127.0.0.1:6379/1')
