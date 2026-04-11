@@ -54,9 +54,9 @@ python manage.py runserver
 ## API Documentation
 The API adheres strictly to OpenAPI specs and provides an automated interactive UI with Swagger.
 Once the server is running, visit:
-- **Swagger UI**: `http://127.0.0.1:8000/api/docs/`
-- **Redoc**: `http://127.0.0.1:8000/api/redoc/`
-- **Raw Schema**: `http://127.0.0.1:8000/api/schema/`
+- **Swagger UI**: `https://kick-360-app-backend.onrender.com/api/docs/`
+- **Redoc**: `https://kick-360-app-backend.onrender.com/api/redoc/`
+- **Raw Schema**: `https://kick-360-app-backend.onrender.com/api/schema/`
 
 admin@kick360.com
 
