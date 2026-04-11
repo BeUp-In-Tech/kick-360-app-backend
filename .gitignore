@@ -162,6 +162,7 @@ profiles/
 training/videos/
 *.mp4
 *.txt
+!requirements.txt
 schema_output*
 test_output*
 err*.txt
