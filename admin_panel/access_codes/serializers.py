@@ -9,5 +9,5 @@ class AdminAccessCodeDetailSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'code', 'duration_months', 'is_active', 
             'is_consumed', 'consumed_at', 'expires_at', 
-            'user', 'user_name', 'created_at'
+            'user', 'user_name', 'shopify_order_id', 'shopify_email', 'created_at'
         ]

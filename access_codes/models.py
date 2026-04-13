@@ -14,6 +14,10 @@ class AccessCode(BaseModel):
     consumed_at = models.DateTimeField(null=True, blank=True)
     expires_at = models.DateTimeField(null=True, blank=True)
     user = models.ForeignKey('accounts.User', on_delete=models.SET_NULL, null=True, blank=True, related_name='consumed_codes')
+    
+    # Shopify data
+    shopify_order_id = models.CharField(max_length=100, null=True, blank=True)
+    shopify_email = models.EmailField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.code} - {self.status} - {'Consumed' if self.is_consumed else 'Available'}"

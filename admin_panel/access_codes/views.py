@@ -22,13 +22,21 @@ class AdminAccessCodeDetailViewSet(viewsets.ModelViewSet, AdminLoggerMixin):
     @action(detail=False, methods=['post'], url_path='fetch-shopify')
     def fetch_shopify(self, request):
         """
-        Placeholder for fetching codes from Shopify.
-        Currently mocks the process.
+        Fetches all codes from Shopify and syncs with local database.
         """
-        # Logic to fetch from Shopify...
-        new_codes_count = 5 
-        # For now, just a success message.
-        return Response({'status': 'success', 'message': f'Fetched {new_codes_count} keys from Shopify (Mocked).'})
+        from access_codes.services import ShopifyService
+        result = ShopifyService.sync_access_codes()
+        
+        if result['status'] == 'success':
+            self.log_action(
+                self.request.user, 
+                f"Synced with Shopify: Created {result['created']}, Updated {result['updated']}", 
+                "AccessCode", 
+                "System"
+            )
+            return Response(result)
+        else:
+            return Response(result, status=status.HTTP_502_BAD_GATEWAY)
 
     @action(detail=False, methods=['post'])
     def bulk_generate(self, request):
