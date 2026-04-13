@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'follows',
     'settings_app',
     'notifications',
+    'admin_panel',
 ]
 
 MIDDLEWARE = [

@@ -18,6 +18,7 @@ def get_tokens_for_user(user):
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
     permission_classes = (AllowAny,)
+    authentication_classes = []
     parser_classes = (parsers.MultiPartParser, parsers.FormParser)
     serializer_class = RegisterSerializer
 
@@ -78,6 +79,7 @@ class RegisterView(generics.CreateAPIView):
 
 class LoginView(generics.GenericAPIView):
     permission_classes = (AllowAny,)
+    authentication_classes = []
     serializer_class = LoginSerializer
 
     def post(self, request, *args, **kwargs):

@@ -55,3 +55,6 @@ class SetNewPasswordSerializer(serializers.Serializer):
         
         data['reset_token'] = reset_token
         return data
+
+class AdminLogoutSerializer(serializers.Serializer):
+    pass

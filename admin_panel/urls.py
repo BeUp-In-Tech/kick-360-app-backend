@@ -4,11 +4,13 @@ from .auth_views import (
     AdminLoginView, 
     AdminPasswordResetView,
     ForgotPasswordView,
-    SetNewPasswordView
+    SetNewPasswordView,
+    AdminLogoutView
 )
 
 urlpatterns = [
     path('auth/login/', AdminLoginView.as_view(), name='admin-login'),
+    path('auth/logout/', AdminLogoutView.as_view(), name='admin-logout'),
     path('auth/reset-password/', AdminPasswordResetView.as_view(), name='admin-reset-password'),
     path('auth/forgot-password/', ForgotPasswordView.as_view(), name='admin-forgot-password'),
     path('auth/set-new-password/', SetNewPasswordView.as_view(), name='admin-set-new-password'),

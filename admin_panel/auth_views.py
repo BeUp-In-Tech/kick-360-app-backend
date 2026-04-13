@@ -5,7 +5,8 @@ from .auth_serializers import (
     AdminLoginSerializer, 
     AdminPasswordResetSerializer,
     ForgotPasswordSerializer,
-    SetNewPasswordSerializer
+    SetNewPasswordSerializer,
+    AdminLogoutSerializer
 )
 from core.exceptions import APIResponse
 from .permissions import IsAdminRole, AdminLoggerMixin
@@ -23,6 +24,7 @@ def get_tokens_for_user(user):
 
 class AdminLoginView(generics.GenericAPIView):
     permission_classes = [permissions.AllowAny]
+    authentication_classes = []
     serializer_class = AdminLoginSerializer
 
     def post(self, request, *args, **kwargs):
@@ -57,6 +59,7 @@ class AdminPasswordResetView(generics.GenericAPIView, AdminLoggerMixin):
 
 class ForgotPasswordView(generics.GenericAPIView):
     permission_classes = [permissions.AllowAny]
+    authentication_classes = []
     serializer_class = ForgotPasswordSerializer
 
     def post(self, request, *args, **kwargs):
@@ -94,6 +97,7 @@ class ForgotPasswordView(generics.GenericAPIView):
 
 class SetNewPasswordView(generics.GenericAPIView):
     permission_classes = [permissions.AllowAny]
+    authentication_classes = []
     serializer_class = SetNewPasswordSerializer
 
     def post(self, request, *args, **kwargs):
@@ -111,3 +115,10 @@ class SetNewPasswordView(generics.GenericAPIView):
         reset_token.save()
         
         return APIResponse(message="Password has been reset successfully. You can now login.")
+
+class AdminLogoutView(generics.GenericAPIView):
+    permission_classes = [IsAdminRole]
+    serializer_class = AdminLogoutSerializer
+
+    def post(self, request, *args, **kwargs):
+        return APIResponse(message="Logout successful.")
