@@ -31,7 +31,7 @@ class AdminTrainingSessionSerializer(serializers.ModelSerializer):
     Steps = serializers.CharField(source='steps', required=False, allow_blank=True)
     Time = serializers.CharField(source='duration_seconds', help_text="Duration (e.g., '10:00')")
     Points = serializers.IntegerField(source='points', default=0)
-    video = serializers.FileField(source='video_file', required=False, allow_null=True)
+    video = serializers.SerializerMethodField()
     is_pulished = serializers.BooleanField(source='is_published', default=False)
 
     class Meta:
@@ -49,6 +49,14 @@ class AdminTrainingSessionSerializer(serializers.ModelSerializer):
             'is_pulished',
             'created_at'
         ]
+
+    def get_video(self, obj):
+        request = self.context.get('request')
+        if obj.video_file:
+            if request is not None:
+                return request.build_absolute_uri(obj.video_file.url)
+            return obj.video_file.url
+        return None
 
     def to_representation(self, instance):
         """

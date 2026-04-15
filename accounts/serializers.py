@@ -5,6 +5,7 @@ from access_codes.services import ShopifyService
 
 class UserSerializer(serializers.ModelSerializer):
     rank = serializers.SerializerMethodField()
+    profile_image = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -14,6 +15,16 @@ class UserSerializer(serializers.ModelSerializer):
     def get_rank(self, obj):
         # Use dynamic_rank if annotated, otherwise fetch the static rank
         return getattr(obj, 'dynamic_rank', obj.rank)
+
+    def get_profile_image(self, obj):
+        request = self.context.get('request')
+        if obj.profile_image:
+            # ensure the URL starts with /media/ if it doesn't already
+            url = obj.profile_image.url
+            if request is not None:
+                return request.build_absolute_uri(url)
+            return url
+        return None
 
 class RegisterSerializer(serializers.ModelSerializer):
     access_code = serializers.CharField(required=True)

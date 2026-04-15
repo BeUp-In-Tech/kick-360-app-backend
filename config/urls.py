@@ -1,6 +1,5 @@
-from django.contrib import admin
-from django.urls import path, include
-from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -24,3 +23,6 @@ urlpatterns = [
     path('api/admin/', include('admin_panel.urls')),
     path('api/access-codes/', include('access_codes.urls')),
 ]
+
+if settings.DEBUG or True: # Always serve locally for Render Disk storage if no S3
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
