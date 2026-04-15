@@ -58,3 +58,10 @@ class LoginSerializer(serializers.Serializer):
         if not User.objects.filter(access_code=value, is_active=True).exists():
             raise serializers.ValidationError("No active account found with this access code.")
         return value
+
+class ProfileUpdateSerializer(serializers.ModelSerializer):
+    profile_image = serializers.ImageField(required=False, allow_null=True)
+
+    class Meta:
+        model = User
+        fields = ['name', 'country', 'position', 'profile_image']
