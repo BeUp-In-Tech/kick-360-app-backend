@@ -1,5 +1,5 @@
-from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
+from django.views.static import serve
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
 from django.conf import settings
 from django.conf.urls.static import static
@@ -25,7 +25,10 @@ urlpatterns = [
     path('api/dashboard/', include('core.urls')),
     path('api/admin/', include('admin_panel.urls')),
     path('api/access-codes/', include('access_codes.urls')),
+
+    # Manual Media Serving (for Render Persistent Disk in production)
+    re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
 ]
 
-if settings.DEBUG or True: # Always serve locally for Render Disk storage if no S3
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+if settings.DEBUG:
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
