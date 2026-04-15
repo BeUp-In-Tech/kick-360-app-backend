@@ -67,27 +67,56 @@ class ShopifyService:
     @staticmethod
     def verify_access_code(code: str) -> dict:
         """
-        Verifies if an access code is valid via Shopify API.
+        Verifies if an access code is valid using the local database.
         Returns a dict: {'is_valid': bool, 'meta': dict}
         """
-        codes = ShopifyService.fetch_all_codes()
-        if not codes:
+        from access_codes.models import AccessCode
+        from django.utils import timezone
+        
+        try:
+            access_code = AccessCode.objects.filter(code=code).first()
+            
+            if not access_code:
+                return {
+                    'is_valid': False, 
+                    'meta': {'error': 'Invalid access code.'}
+                }
+            
+            # 1. Check status
+            if access_code.status == 'not_sent':
+                return {
+                    'is_valid': False, 
+                    'meta': {'error': 'Access code is not activated.'}
+                }
+            
+            # 2. Check if consumed
+            if access_code.is_consumed:
+                return {
+                    'is_valid': False, 
+                    'meta': {'error': 'Access code has already been used.'}
+                }
+            
+            # 3. Check expiration
+            if access_code.expires_at and access_code.expires_at < timezone.now():
+                return {
+                    'is_valid': False, 
+                    'meta': {'error': 'Access code has expired.'}
+                }
+                
             return {
-                'is_valid': False, 
-                'meta': {'error': 'Could not reach Shopify service.'}
+                'is_valid': True, 
+                'meta': {
+                    'code': access_code.code,
+                    'status': access_code.status,
+                    'order_id': access_code.shopify_order_id,
+                    'email': access_code.shopify_email
+                }
             }
             
-        for c in codes:
-            if c.get('code') == code:
-                if c.get('status') == 'sent':
-                    return {'is_valid': True, 'meta': c}
-                else:
-                    return {
-                        'is_valid': False, 
-                        'meta': {'error': f'Access code is not activated (status: {c.get("status")}).'}
-                    }
-        return {
-            'is_valid': False, 
-            'meta': {'error': 'Invalid access code.'}
-        }
+        except Exception as e:
+            logger.error(f"Error verifying access code locally: {str(e)}")
+            return {
+                'is_valid': False, 
+                'meta': {'error': 'An internal error occurred.'}
+            }
 

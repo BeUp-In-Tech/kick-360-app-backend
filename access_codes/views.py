@@ -20,38 +20,21 @@ class AccessCodeVerifyView(generics.CreateAPIView):
         code = serializer.validated_data['code']
         
         try:
-            try:
-                access_code = AccessCode.objects.get(code=code)
-            except AccessCode.DoesNotExist:
+            verify_response = ShopifyService.verify_access_code(code)
+            
+            if not verify_response['is_valid']:
                 return APIResponse(
                     data={},
-                    message="Invalid access code",
+                    message=verify_response['meta'].get('error', 'Invalid access code.'),
                     status=status.HTTP_400_BAD_REQUEST
                 )
             
-            if access_code.status == 'not_sent':
-                return APIResponse(
-                    data={},
-                    message="Access code is not activated (status: not_sent).",
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-            
-            if access_code.is_consumed:
-                return APIResponse(
-                    data={},
-                    message="This access code has already been used.",
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-            
-            # Consume the code
-            access_code.is_consumed = True
-            access_code.user = request.user
-            access_code.consumed_at = timezone.now()
-            access_code.save()
+            # Retrieve the local object to return its data
+            access_code = AccessCode.objects.get(code=code)
             
             return APIResponse(
                 data=AccessCodeSerializer(access_code).data,
-                message="Access code verified and consumed successfully."
+                message="Access code is valid."
             )
             
         except Exception as e:

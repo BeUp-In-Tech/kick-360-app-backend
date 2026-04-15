@@ -29,19 +29,14 @@ class RegisterSerializer(serializers.ModelSerializer):
         }
 
     def validate_access_code(self, value):
-        # 1. Verify via external Shopify Service
+        # 1. Verify via local database (previously external)
         verify_response = ShopifyService.verify_access_code(value)
         if not verify_response['is_valid']:
             raise serializers.ValidationError(verify_response['meta'].get('error', 'Invalid access code.'))
             
-        # 2. Check if already consumed locally
-        access_code_obj = AccessCode.objects.filter(code=value).first()
-        if access_code_obj and access_code_obj.is_consumed:
-            raise serializers.ValidationError("Access code has already been used.")
-            
-        # 3. Check if already linked to a user account
+        # 2. Check if already linked to a user account (safety check)
         if User.objects.filter(access_code=value).exists():
-            raise serializers.ValidationError("Access code is already linked to an account.")
+            raise serializers.ValidationError("Access code is already registered.")
             
         return value
 

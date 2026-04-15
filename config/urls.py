@@ -22,4 +22,5 @@ urlpatterns = [
     path('api/notifications/', include('notifications.urls')),
     path('api/dashboard/', include('core.urls')),
     path('api/admin/', include('admin_panel.urls')),
+    path('api/access-codes/', include('access_codes.urls')),
 ]
