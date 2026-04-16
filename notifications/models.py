@@ -28,6 +28,7 @@ class Notification(BaseModel):
     title = models.CharField(max_length=255)
     message = models.TextField()
     notification_type = models.CharField(max_length=50, choices=NOTIFICATION_TYPES)
+    related_item_id = models.CharField(max_length=255, null=True, blank=True)
     
     is_read = models.BooleanField(default=False)
     

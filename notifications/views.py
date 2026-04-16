@@ -61,6 +61,10 @@ class UserNotificationListView(BaseNotificationListView):
     List user notifications
     """
     def get_queryset(self):
+        if getattr(self, 'swagger_fake_view', False):
+            return Notification.objects.none()
+        if not self.request.user.is_authenticated:
+            return Notification.objects.none()
         return Notification.objects.filter(recipient=self.request.user, is_for_admin=False)
 
 class AdminNotificationListView(BaseNotificationListView):
@@ -68,7 +72,9 @@ class AdminNotificationListView(BaseNotificationListView):
     List admin notifications
     """
     def get_queryset(self):
-        if not self.request.user.is_staff:
+        if getattr(self, 'swagger_fake_view', False):
+            return Notification.objects.none()
+        if not self.request.user.is_authenticated or not self.request.user.is_staff:
             return Notification.objects.none()
         return Notification.objects.filter(recipient=self.request.user, is_for_admin=True)
 
@@ -76,6 +82,10 @@ class NotificationDetailView(generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
     
     def get_queryset(self):
+        if getattr(self, 'swagger_fake_view', False):
+            return Notification.objects.none()
+        if not self.request.user.is_authenticated:
+            return Notification.objects.none()
         # Allows retrieving if user is recipient
         # No distinction between admin/user notifications needed at this level since per-user isolation exists
         return Notification.objects.filter(recipient=self.request.user)
