@@ -85,3 +85,46 @@ def send_push_notification(users, title, body, data_payload=None):
     except Exception as e:
         logger.error(f"Error sending FCM notification: {str(e)}")
         return False, str(e)
+
+def create_user_notification(user, title, message, notification_type, related_item_id=None):
+    from .models import Notification
+    notification = Notification.objects.create(
+        recipient=user,
+        is_for_admin=False,
+        title=title,
+        message=message,
+        notification_type=notification_type,
+        related_item_id=related_item_id
+    )
+    send_push_notification([user], title, message, data_payload={
+        'notification_type': notification_type,
+        'related_item_id': str(related_item_id) if related_item_id else ''
+    })
+    return notification
+
+def create_admin_notification(title, message, notification_type, related_item_id=None):
+    from .models import Notification
+    from accounts.models import User
+    
+    # Broadcast to all staff members
+    admins = User.objects.filter(is_staff=True, is_active=True)
+    notifications_to_create = []
+    
+    for admin in admins:
+        notifications_to_create.append(
+            Notification(
+                recipient=admin,
+                is_for_admin=True,
+                title=title,
+                message=message,
+                notification_type=notification_type,
+                related_item_id=related_item_id
+            )
+        )
+    if notifications_to_create:
+        Notification.objects.bulk_create(notifications_to_create)
+        send_push_notification(admins, title, message, data_payload={
+            'notification_type': notification_type,
+            'related_item_id': str(related_item_id) if related_item_id else ''
+        })
+

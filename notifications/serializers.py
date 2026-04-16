@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import FCMDevice
+from .models import FCMDevice, Notification
 
 class FCMDeviceSerializer(serializers.ModelSerializer):
     class Meta:
@@ -23,3 +23,9 @@ class FCMDeviceSerializer(serializers.ModelSerializer):
             }
         )
         return device
+
+class NotificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Notification
+        fields = ['id', 'title', 'message', 'notification_type', 'related_item_id', 'is_read', 'created_at']
+

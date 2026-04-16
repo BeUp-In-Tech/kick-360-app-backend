@@ -22,3 +22,6 @@ class NotificationsConfig(AppConfig):
                 print(f"Failed to initialize Firebase: {e}")
         else:
             print("FIREBASE_CREDENTIALS not set or file not found. Push notifications will be mocked.")
+        
+        # Import signals to register them
+        import notifications.signals
