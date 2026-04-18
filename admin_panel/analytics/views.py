@@ -16,7 +16,10 @@ from admin_panel.permissions import IsAdminRole, AdminLoggerMixin
 from .serializers import AdminOverviewSerializer, AdminActivityLogSerializer
 
 from io import BytesIO
-from xhtml2pdf import pisa
+try:
+    from xhtml2pdf import pisa
+except ImportError:
+    pisa = None
 
 class AdminOverviewViewSet(viewsets.ViewSet, AdminLoggerMixin):
     permission_classes = [IsAdminRole]

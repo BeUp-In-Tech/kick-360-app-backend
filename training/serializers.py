@@ -1,4 +1,6 @@
 from rest_framework import serializers
+from drf_spectacular.utils import extend_schema_field
+from drf_spectacular.types import OpenApiTypes
 from .models import TrainingCategory, TrainingCompletion, TrainingSession
 from accounts.serializers import UserSerializer
 
@@ -14,6 +16,7 @@ class TrainingSessionSerializer(serializers.ModelSerializer):
         model = TrainingSession
         fields = ['id', 'category', 'title', 'subtitle', 'description', 'equipment_used', 'steps', 'video_file', 'video_url', 'duration_seconds', 'points', 'score_required', 'is_published', 'created_at']
 
+    @extend_schema_field(OpenApiTypes.URI)
     def get_video_url(self, obj):
         if obj.video_file:
             request = self.context.get('request')

@@ -1,4 +1,6 @@
 from rest_framework import serializers
+from drf_spectacular.utils import extend_schema_field
+from drf_spectacular.types import OpenApiTypes
 from .models import Session
 
 class SessionSerializer(serializers.ModelSerializer):
@@ -9,6 +11,7 @@ class SessionSerializer(serializers.ModelSerializer):
         fields = ['id', 'user', 'total_kick', 'video_file', 'mode', 'is_story', 'is_shared_to_leaderboard', 'session_duration', 'countdown_time', 'created_at']
         read_only_fields = ['id', 'user', 'created_at']
 
+    @extend_schema_field(OpenApiTypes.URI)
     def get_video_file(self, obj):
         request = self.context.get('request')
         if obj.video_file:

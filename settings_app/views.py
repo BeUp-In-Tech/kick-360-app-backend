@@ -12,6 +12,7 @@ from core.exceptions import APIResponse
 class ProfileViewSet(viewsets.GenericViewSet):
     permission_classes = [IsAuthenticated]
     parser_classes = [MultiPartParser, FormParser]
+    queryset = User.objects.none()
 
     def get_serializer_class(self):
         if self.action in ['update', 'partial_update']:

@@ -1,4 +1,6 @@
 from rest_framework import serializers
+from drf_spectacular.utils import extend_schema_field
+from drf_spectacular.types import OpenApiTypes
 from .models import User
 from access_codes.models import AccessCode
 from access_codes.services import ShopifyService
@@ -18,12 +20,14 @@ class UserSerializer(serializers.ModelSerializer):
                   'expires_at', 'latest_session', 'active_story', 'performance']
         read_only_fields = ['id', 'access_code', 'total_kicks', 'rank', 'points', 'streak']
 
+    @extend_schema_field(OpenApiTypes.STR)
     def get_expires_at(self, obj):
         from access_codes.models import AccessCode
         from django.utils import timezone
         code = AccessCode.objects.filter(user=obj, is_consumed=True, expires_at__gt=timezone.now()).order_by('-expires_at').first()
         return code.expires_at.isoformat() if code and code.expires_at else None
 
+    @extend_schema_field(OpenApiTypes.OBJECT)
     def get_latest_session(self, obj):
         from sessions.serializers import SessionSerializer
         session = obj.sessions.filter(is_story=False).order_by('-created_at').first()
@@ -31,6 +35,7 @@ class UserSerializer(serializers.ModelSerializer):
             return SessionSerializer(session, context=self.context).data
         return None
 
+    @extend_schema_field(OpenApiTypes.OBJECT)
     def get_active_story(self, obj):
         from sessions.serializers import SessionSerializer
         from django.utils import timezone
@@ -41,6 +46,7 @@ class UserSerializer(serializers.ModelSerializer):
             return SessionSerializer(story, context=self.context).data
         return None
 
+    @extend_schema_field(OpenApiTypes.OBJECT)
     def get_performance(self, obj):
         from stats.models import PerformanceTrack
         from stats.serializers import PerformanceTrackSerializer
@@ -49,10 +55,12 @@ class UserSerializer(serializers.ModelSerializer):
             return PerformanceTrackSerializer(perf, context=self.context).data
         return None
 
+    @extend_schema_field(OpenApiTypes.INT)
     def get_rank(self, obj):
         # Use dynamic_rank if annotated, otherwise fetch the static rank
         return getattr(obj, 'dynamic_rank', obj.rank)
 
+    @extend_schema_field(OpenApiTypes.URI)
     def get_profile_image(self, obj):
         request = self.context.get('request')
         if obj.profile_image:
