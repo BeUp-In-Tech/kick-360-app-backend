@@ -24,9 +24,6 @@ class TrainingSessionListView(generics.ListAPIView):
     def get_queryset(self):
         return TrainingSession.objects.filter(is_published=True).order_by('-created_at')
 
-    @extend_schema_field(OpenApiTypes.URI)
-    def get_video_file(self, obj):
-        return TrainingSession.objects.filter(is_published=True).order_by('-created_at')
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())

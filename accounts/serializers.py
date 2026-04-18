@@ -24,7 +24,7 @@ class UserSerializer(serializers.ModelSerializer):
     def get_expires_at(self, obj):
         from access_codes.models import AccessCode
         from django.utils import timezone
-        code = AccessCode.objects.filter(user=obj, is_consumed=True, expires_at__gt=timezone.now()).order_by('-expires_at').first()
+        code = AccessCode.objects.filter(user=obj, is_consumed=True).order_by('-expires_at').first()
         return code.expires_at.isoformat() if code and code.expires_at else None
 
     @extend_schema_field(OpenApiTypes.OBJECT)

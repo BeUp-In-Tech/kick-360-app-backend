@@ -13,7 +13,7 @@ class AdminAccessCodeDetailViewSet(viewsets.ModelViewSet, AdminLoggerMixin):
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     filterset_fields = ['is_consumed', 'is_active']
     search_fields = ['code', 'user__name']
-    http_method_names = ['get', 'patch', 'delete', 'head', 'options']
+    http_method_names = ['get', 'put', 'patch', 'delete', 'head', 'options']
 
     def perform_update(self, serializer):
         access_code = serializer.save()
