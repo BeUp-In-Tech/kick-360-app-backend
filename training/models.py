@@ -22,6 +22,9 @@ class TrainingSession(BaseModel):
     points = models.IntegerField(default=0)
     score_required = models.IntegerField(default=0)
     is_published = models.BooleanField(default=False)
+    reattempt = models.BooleanField(default=False)
+    participate_count = models.IntegerField(default=0)
+    video_watched_count = models.IntegerField(default=0)
 
     def __str__(self):
         return self.title

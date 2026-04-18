@@ -21,3 +21,15 @@ class AccessCode(BaseModel):
 
     def __str__(self):
         return f"{self.code} - {self.status} - {'Consumed' if self.is_consumed else 'Available'}"
+
+class VerificationPackage(BaseModel):
+    CATEGORY_CHOICES = (
+        ('basic', 'Basic'),
+        ('weekly', 'Weekly'),
+        ('advanced', 'Advanced'),
+    )
+    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, unique=True)
+    product_purchase_link = models.URLField(max_length=500, blank=True, null=True)
+
+    def __str__(self):
+        return self.get_category_display()

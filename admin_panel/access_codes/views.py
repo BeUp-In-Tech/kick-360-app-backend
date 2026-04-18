@@ -54,3 +54,24 @@ class AdminAccessCodeDetailViewSet(viewsets.ModelViewSet, AdminLoggerMixin):
         
         AccessCode.objects.bulk_create(codes, ignore_conflicts=True)
         return Response({'status': 'success', 'message': f'{count} codes generated with {duration} month(s) validation.'})
+
+from access_codes.models import VerificationPackage
+from .serializers import AdminVerificationPackageSerializer
+
+class AdminVerificationPackageViewSet(viewsets.ModelViewSet, AdminLoggerMixin):
+    queryset = VerificationPackage.objects.all().order_by('-created_at')
+    serializer_class = AdminVerificationPackageSerializer
+    permission_classes = [IsAdminRole]
+    
+    def perform_create(self, serializer):
+        package = serializer.save()
+        self.log_action(self.request.user, "Created Verification Package", "VerificationPackage", str(package.id))
+
+    def perform_update(self, serializer):
+        package = serializer.save()
+        self.log_action(self.request.user, "Updated Verification Package", "VerificationPackage", str(package.id))
+
+    def perform_destroy(self, instance):
+        package_id = str(instance.id)
+        instance.delete()
+        self.log_action(self.request.user, "Deleted Verification Package", "VerificationPackage", package_id)

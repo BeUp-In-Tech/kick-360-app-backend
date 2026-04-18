@@ -44,6 +44,19 @@ class SessionCompleteView(generics.CreateAPIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
+class DailySessionCreateView(SessionCompleteView):
+    """Alias for backwards compatibility or explicit naming for daily sessions."""
+    pass
+
+class StoryUploadView(SessionCompleteView):
+    """Endpoint specifically for uploading story videos."""
+    def create(self, request, *args, **kwargs):
+        # Force is_story to True
+        if isinstance(request.data, dict):
+            request.data._mutable = True
+        request.data['is_story'] = True
+        return super().create(request, *args, **kwargs)
+
 class SessionHistoryView(generics.ListAPIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = SessionSerializer

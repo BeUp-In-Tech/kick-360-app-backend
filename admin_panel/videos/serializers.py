@@ -33,6 +33,9 @@ class AdminTrainingSessionSerializer(serializers.ModelSerializer):
     Points = serializers.IntegerField(source='points', default=0)
     video = serializers.FileField(source='video_file', required=False, allow_null=True)
     is_pulished = serializers.BooleanField(source='is_published', default=False)
+    reattempt = serializers.BooleanField(default=False)
+    participate_count = serializers.IntegerField(read_only=True)
+    video_watched_count = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = TrainingSession
@@ -47,6 +50,9 @@ class AdminTrainingSessionSerializer(serializers.ModelSerializer):
             'Points',
             'video',
             'is_pulished',
+            'reattempt',
+            'participate_count',
+            'video_watched_count',
             'created_at'
         ]
 

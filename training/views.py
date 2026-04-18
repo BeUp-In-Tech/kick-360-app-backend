@@ -55,3 +55,12 @@ class TrainingCompleteView(generics.GenericAPIView):
             data=TrainingCompletionSerializer(completion).data,
             message="Training completed successfully."
         )
+
+class TrainingSessionWatchView(generics.GenericAPIView):
+    permission_classes = (IsAuthenticated, HasActiveSubscription)
+    lookup_url_kwarg = 'id'
+
+    def post(self, request, id, *args, **kwargs):
+        training_session = get_object_or_404(TrainingSession, id=id, is_published=True)
+        TrainingService.watch_video(training_session)
+        return APIResponse(message="Video watch count incremented.")

@@ -92,9 +92,8 @@ class LoginView(generics.GenericAPIView):
         except User.DoesNotExist:
             return APIResponse(message="Invalid access code.", status=status.HTTP_401_UNAUTHORIZED)
         
-        # TEMPORARY: Allow login even if subscription is "expired" for testing
-        # if not user.is_subscription_active:
-        #     return APIResponse(message="Your access code has expired. Please purchase a new one.", status=status.HTTP_403_FORBIDDEN)
+        if not user.is_subscription_active:
+             return APIResponse(message="Your access code has expired. Please purchase a new one.", status=status.HTTP_403_FORBIDDEN)
 
         # Log Activity
         from core.models import UserActivityLog
@@ -124,3 +123,42 @@ class LogoutView(generics.GenericAPIView):
     def post(self, request, *args, **kwargs):
         return APIResponse(message="Logout successful.")
 
+class DeleteAccountView(generics.GenericAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = LogoutSerializer # Dummy serializer for schema
+
+    def delete(self, request, *args, **kwargs):
+        user = request.user
+        # Log this somehow, or notify admins based on previous pattern
+        admins = User.objects.filter(is_staff=True)
+        send_push_notification(
+            users=admins,
+            title="User Deleted Account",
+            body=f"User {user.name or user.email or user.access_code} has deleted their account.",
+            data_payload={'type': 'user_deleted', 'user_id': str(user.id)}
+        )
+        user.delete()
+        return APIResponse(message="Account deleted successfully.")
+
+
+from core.models import UserActivityLog
+from .serializers import UserActivityLogSerializer
+
+class UserActivityLogView(generics.ListAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = UserActivityLogSerializer
+
+    def get_queryset(self):
+        if getattr(self, "swagger_fake_view", False):
+            return UserActivityLog.objects.none()
+        return UserActivityLog.objects.filter(user=self.request.user).order_by('-created_at')
+        
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return APIResponse(data=serializer.data, message="Activity logs retrieved.")

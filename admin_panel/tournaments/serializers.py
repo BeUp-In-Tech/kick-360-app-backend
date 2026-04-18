@@ -6,7 +6,7 @@ class AdminTournamentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Tournament
-        fields = ['id', 'title', 'description', 'start_date', 'end_date', 'product_purchase_link', 'prize_money', 'is_free', 'is_active', 'participant_count', 'created_at']
+        fields = ['id', 'title', 'description', 'start_date', 'end_date', 'category', 'prize_money', 'is_free', 'is_active', 'participant_count', 'created_at']
 
 class AdminTournamentParticipationSerializer(serializers.ModelSerializer):
     user_name = serializers.CharField(source='user.name', read_only=True)

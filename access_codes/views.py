@@ -44,3 +44,16 @@ class AccessCodeVerifyView(generics.CreateAPIView):
                 message="An error occurred while verifying the access code.",
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+from .models import VerificationPackage
+from .serializers import VerificationPackageSerializer
+
+class VerificationPackageListView(generics.ListAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = VerificationPackageSerializer
+    queryset = VerificationPackage.objects.all().order_by('-created_at')
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        serializer = self.get_serializer(queryset, many=True)
+        return APIResponse(data=serializer.data, message="Packages retrieved successfully.")

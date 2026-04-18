@@ -6,11 +6,48 @@ from access_codes.services import ShopifyService
 class UserSerializer(serializers.ModelSerializer):
     rank = serializers.SerializerMethodField()
     profile_image = serializers.SerializerMethodField()
+    expires_at = serializers.SerializerMethodField()
+    latest_session = serializers.SerializerMethodField()
+    active_story = serializers.SerializerMethodField()
+    performance = serializers.SerializerMethodField()
 
     class Meta:
         model = User
-        fields = ['id', 'name', 'profile_image', 'country', 'position', 'access_code', 'total_kicks', 'rank', 'points', 'streak']
+        fields = ['id', 'email', 'name', 'profile_image', 'country', 'position', 
+                  'access_code', 'total_kicks', 'rank', 'points', 'streak', 'last_session_date',
+                  'expires_at', 'latest_session', 'active_story', 'performance']
         read_only_fields = ['id', 'access_code', 'total_kicks', 'rank', 'points', 'streak']
+
+    def get_expires_at(self, obj):
+        from access_codes.models import AccessCode
+        from django.utils import timezone
+        code = AccessCode.objects.filter(user=obj, is_consumed=True, expires_at__gt=timezone.now()).order_by('-expires_at').first()
+        return code.expires_at.isoformat() if code and code.expires_at else None
+
+    def get_latest_session(self, obj):
+        from sessions.serializers import SessionSerializer
+        session = obj.sessions.filter(is_story=False).order_by('-created_at').first()
+        if session:
+            return SessionSerializer(session, context=self.context).data
+        return None
+
+    def get_active_story(self, obj):
+        from sessions.serializers import SessionSerializer
+        from django.utils import timezone
+        import datetime
+        twenty_four_hours_ago = timezone.now() - datetime.timedelta(hours=24)
+        story = obj.sessions.filter(is_story=True, created_at__gte=twenty_four_hours_ago).order_by('-created_at').first()
+        if story:
+            return SessionSerializer(story, context=self.context).data
+        return None
+
+    def get_performance(self, obj):
+        from stats.models import PerformanceTrack
+        from stats.serializers import PerformanceTrackSerializer
+        perf = PerformanceTrack.objects.filter(user=obj).order_by('-created_at').first()
+        if perf:
+            return PerformanceTrackSerializer(perf, context=self.context).data
+        return None
 
     def get_rank(self, obj):
         # Use dynamic_rank if annotated, otherwise fetch the static rank
@@ -65,3 +102,11 @@ class ProfileUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['name', 'country', 'position', 'profile_image']
+
+from core.models import UserActivityLog
+
+class UserActivityLogSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserActivityLog
+        fields = ['id', 'activity_type', 'description', 'ip_address', 'created_at']
+        read_only_fields = ['id', 'created_at']
