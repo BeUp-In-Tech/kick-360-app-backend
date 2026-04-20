@@ -1,5 +1,6 @@
-from rest_framework import generics, status, serializers
+from rest_framework import generics, status, serializers, parsers
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.parsers import MultiPartParser, FormParser
 from core.permissions import HasActiveSubscription
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
@@ -34,6 +35,7 @@ class TrainingSessionListView(generics.ListAPIView):
 class TrainingCompleteView(generics.GenericAPIView):
     permission_classes = (IsAuthenticated, HasActiveSubscription)
     serializer_class = CompleteTrainingRequestSerializer
+    parser_classes = [MultiPartParser, FormParser]
     lookup_url_kwarg = 'id'
 
     @extend_schema(
@@ -45,11 +47,13 @@ class TrainingCompleteView(generics.GenericAPIView):
         serializer.is_valid(raise_exception=True)
         
         score_achieved = serializer.validated_data.get('score_achieved', 0)
+        video_file = serializer.validated_data.get('video_file')
         
         completion = TrainingService.complete_training(
             user=request.user,
             training_session=training_session,
-            score_achieved=score_achieved
+            score_achieved=score_achieved,
+            video_file=video_file
         )
         
         return APIResponse(

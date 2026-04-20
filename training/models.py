@@ -34,6 +34,7 @@ class TrainingCompletion(BaseModel):
     training_session = models.ForeignKey(TrainingSession, on_delete=models.CASCADE, related_name='completions')
     score_achieved = models.IntegerField(default=0)
     points_awarded = models.IntegerField(default=0)
+    video_file = models.FileField(upload_to='training/completions/videos/', null=True, blank=True)
 
     def __str__(self):
         return f"{self.user.name} completed {self.training_session.title}"

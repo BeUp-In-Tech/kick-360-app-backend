@@ -7,7 +7,7 @@ from notifications.utils import send_push_notification
 class TrainingService:
     @staticmethod
     @transaction.atomic
-    def complete_training(user: User, training_session: TrainingSession, score_achieved: int) -> TrainingCompletion:
+    def complete_training(user: User, training_session: TrainingSession, score_achieved: int, video_file=None) -> TrainingCompletion:
         """
         """
         points_to_award = training_session.points
@@ -18,7 +18,9 @@ class TrainingService:
         if existing_completion:
             if training_session.reattempt:
                 existing_completion.score_achieved = score_achieved
-                existing_completion.save(update_fields=['score_achieved'])
+                if video_file:
+                    existing_completion.video_file = video_file
+                existing_completion.save(update_fields=['score_achieved', 'video_file'] if video_file else ['score_achieved'])
                 completion = existing_completion
                 # Do not award points again, or award delta? Let's just update score.
             else:
@@ -28,7 +30,8 @@ class TrainingService:
                 user=user,
                 training_session=training_session,
                 score_achieved=score_achieved,
-                points_awarded=points_to_award
+                points_awarded=points_to_award,
+                video_file=video_file
             )
             # Award points and increment participation only on first attempt
             user.points += points_to_award

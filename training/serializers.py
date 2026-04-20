@@ -28,10 +28,21 @@ class TrainingSessionSerializer(serializers.ModelSerializer):
 class TrainingCompletionSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
     training_session = TrainingSessionSerializer(read_only=True)
+    video_file = serializers.SerializerMethodField()
 
     class Meta:
         model = TrainingCompletion
-        fields = ['id', 'user', 'training_session', 'score_achieved', 'points_awarded', 'created_at']
+        fields = ['id', 'user', 'training_session', 'score_achieved', 'points_awarded', 'video_file', 'created_at']
+
+    @extend_schema_field(OpenApiTypes.URI)
+    def get_video_file(self, obj):
+        if obj.video_file:
+            request = self.context.get('request')
+            if request is not None:
+                return request.build_absolute_uri(obj.video_file.url)
+            return obj.video_file.url
+        return None
 
 class CompleteTrainingRequestSerializer(serializers.Serializer):
     score_achieved = serializers.IntegerField(default=0)
+    video_file = serializers.FileField(required=False, allow_null=True)

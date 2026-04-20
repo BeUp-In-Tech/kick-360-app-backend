@@ -7,7 +7,7 @@ from admin_panel.permissions import IsAdminRole, AdminLoggerMixin
 from .serializers import AdminAccessCodeDetailSerializer
 
 class AdminAccessCodeDetailViewSet(viewsets.ModelViewSet, AdminLoggerMixin):
-    queryset = AccessCode.objects.all().order_by('-created_at')
+    queryset = AccessCode.objects.all().order_by('-is_consumed', '-created_at')
     serializer_class = AdminAccessCodeDetailSerializer
     permission_classes = [IsAdminRole]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]

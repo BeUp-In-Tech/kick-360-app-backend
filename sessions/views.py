@@ -1,5 +1,6 @@
-from rest_framework import generics, status
+from rest_framework import generics, status, parsers
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.parsers import MultiPartParser, FormParser
 from core.permissions import HasActiveSubscription
 from .models import Session
 from .serializers import SessionSerializer, SessionCompleteSerializer, SessionShareToggleSerializer
@@ -12,12 +13,13 @@ logger = logging.getLogger(__name__)
 class SessionCompleteView(generics.CreateAPIView):
     permission_classes = (IsAuthenticated, HasActiveSubscription)
     serializer_class = SessionCompleteSerializer
+    parser_classes = [MultiPartParser, FormParser]
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         
-        video_file = request.FILES.get('video_file')
+        video_file = serializer.validated_data.get('video_file')
         
         try:
             session = SessionService.complete_session(
@@ -51,10 +53,19 @@ class DailySessionCreateView(SessionCompleteView):
 class StoryUploadView(SessionCompleteView):
     """Endpoint specifically for uploading story videos."""
     def create(self, request, *args, **kwargs):
-        # Force is_story to True
-        if isinstance(request.data, dict):
+        # Handle QueryDict (from multipart) vs standard dict
+        if hasattr(request.data, '_mutable'):
             request.data._mutable = True
-        request.data['is_story'] = True
+            request.data['is_story'] = True
+            request.data._mutable = False
+        else:
+            # It's a standard dict or similar
+            try:
+                request.data['is_story'] = True
+            except TypeError:
+                # If immutable dict, work on a copy
+                request.data = request.data.copy()
+                request.data['is_story'] = True
         return super().create(request, *args, **kwargs)
 
 class SessionHistoryView(generics.ListAPIView):
