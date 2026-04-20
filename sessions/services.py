@@ -27,11 +27,8 @@ class SessionService:
         is_shared_to_leaderboard = data.get('is_shared_to_leaderboard', False)
         session_duration = data.get('session_duration', 5)
         
-        # 1. 5 Videos Limit Check
-        if video_file:
-            current_video_count = Session.objects.filter(user=user).exclude(video_file='').count()
-            if current_video_count >= 5:
-                raise ValueError("Video limit reached. You can only save a maximum of 5 videos.")
+        # 1. Video Limit Check (Removed as per user request for unlimited uploads)
+        pass
 
         # 2. Daily Streak Update
         today = timezone.localdate()

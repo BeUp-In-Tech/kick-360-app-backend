@@ -7,11 +7,20 @@ class SessionSerializer(serializers.ModelSerializer):
     video_file = serializers.SerializerMethodField()
     session_id = serializers.UUIDField(source='id', read_only=True)
     sessionId = serializers.UUIDField(source='id', read_only=True)
+    is_saved = serializers.SerializerMethodField()
 
     class Meta:
         model = Session
-        fields = ['id', 'session_id', 'sessionId', 'user', 'total_kick', 'video_file', 'mode', 'is_story', 'is_shared_to_leaderboard', 'session_duration', 'countdown_time', 'created_at']
-        read_only_fields = ['id', 'session_id', 'sessionId', 'user', 'created_at']
+        fields = ['id', 'session_id', 'sessionId', 'user', 'total_kick', 'video_file', 'mode', 'is_story', 'is_shared_to_leaderboard', 'session_duration', 'countdown_time', 'is_saved', 'created_at']
+        read_only_fields = ['id', 'session_id', 'sessionId', 'user', 'is_saved', 'created_at']
+
+    @extend_schema_field(OpenApiTypes.BOOL)
+    def get_is_saved(self, obj):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            from settings_app.models import SavedVideo
+            return SavedVideo.objects.filter(user=request.user, session=obj).exists()
+        return False
 
     @extend_schema_field(OpenApiTypes.URI)
     def get_video_file(self, obj):

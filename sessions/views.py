@@ -142,3 +142,34 @@ class GlobalStoriesView(generics.ListAPIView):
 
         serializer = self.get_serializer(queryset, many=True)
         return APIResponse(data=serializer.data, message="Global stories retrieved.")
+
+class SessionDetailView(generics.RetrieveUpdateDestroyAPIView):
+    """
+    Allow users to fetch, update or delete their own sessions.
+    Deleting a session also removes associated SavedVideo bookmarks.
+    """
+    permission_classes = (IsAuthenticated,)
+    serializer_class = SessionSerializer
+    queryset = Session.objects.all()
+
+    def get_queryset(self):
+        # Users can only see/modify their own sessions
+        return Session.objects.filter(user=self.request.user)
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, context={'request': request})
+        return APIResponse(data=serializer.data, message="Session details retrieved.")
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return APIResponse(data=serializer.data, message="Session updated successfully.")
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        return APIResponse(message="Session deleted successfully.", status=status.HTTP_200_OK)
