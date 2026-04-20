@@ -162,3 +162,16 @@ class UserActivityLogView(generics.ListAPIView):
 
         serializer = self.get_serializer(queryset, many=True)
         return APIResponse(data=serializer.data, message="Activity logs retrieved.")
+
+class PublicProfileView(generics.RetrieveAPIView):
+    """
+    Allows viewing any user's public profile data including rank and active story.
+    """
+    queryset = User.objects.filter(is_active=True)
+    permission_classes = (IsAuthenticated,)
+    serializer_class = UserSerializer
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, context={'request': request})
+        return APIResponse(data=serializer.data, message="User profile retrieved.")

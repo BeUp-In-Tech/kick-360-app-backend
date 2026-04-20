@@ -71,10 +71,20 @@ class SavedVideoViewSet(mixins.ListModelMixin, mixins.DestroyModelMixin, viewset
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True, context={'request': request})
+            # Combine pagination data with APIResponse
+            paginated_resp = self.get_paginated_response(serializer.data)
+            return APIResponse(
+                data=paginated_resp.data,
+                message="Saved videos retrieved."
+            )
+
         serializer = self.get_serializer(queryset, many=True, context={'request': request})
         return APIResponse(data=serializer.data, message="Saved videos retrieved.")
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
         self.perform_destroy(instance)
-        return APIResponse(message="Video removed from saved.", status=status.HTTP_204_NO_CONTENT)
+        return APIResponse(message="Video removed from saved.", status=status.HTTP_200_OK)

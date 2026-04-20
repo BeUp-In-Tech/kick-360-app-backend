@@ -112,3 +112,33 @@ class SessionShareToggleView(generics.UpdateAPIView):
             data=SessionSerializer(updated_session).data,
             message=f"Session share settings updated successfully."
         )
+
+class GlobalStoriesView(generics.ListAPIView):
+    """
+    Returns a list of all active stories (from the last 24 hours) from all users.
+    """
+    permission_classes = (IsAuthenticated,)
+    serializer_class = SessionSerializer
+
+    def get_queryset(self):
+        from django.utils import timezone
+        import datetime
+        twenty_four_hours_ago = timezone.now() - datetime.timedelta(hours=24)
+        return Session.objects.filter(
+            is_story=True, 
+            created_at__gte=twenty_four_hours_ago
+        ).select_related('user').order_by('-created_at')
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            paginated_resp = self.get_paginated_response(serializer.data)
+            return APIResponse(
+                data=paginated_resp.data,
+                message="Global stories retrieved."
+            )
+
+        serializer = self.get_serializer(queryset, many=True)
+        return APIResponse(data=serializer.data, message="Global stories retrieved.")
