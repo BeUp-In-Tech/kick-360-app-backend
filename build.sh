@@ -6,3 +6,6 @@ pip install -r requirements.txt
 
 python manage.py collectstatic --no-input
 python manage.py migrate
+
+# Ensure media directory exists for persistent disk
+mkdir -p /var/data/media
