@@ -5,11 +5,13 @@ from .models import Session
 
 class SessionSerializer(serializers.ModelSerializer):
     video_file = serializers.SerializerMethodField()
+    session_id = serializers.UUIDField(source='id', read_only=True)
+    sessionId = serializers.UUIDField(source='id', read_only=True)
 
     class Meta:
         model = Session
-        fields = ['id', 'user', 'total_kick', 'video_file', 'mode', 'is_story', 'is_shared_to_leaderboard', 'session_duration', 'countdown_time', 'created_at']
-        read_only_fields = ['id', 'user', 'created_at']
+        fields = ['id', 'session_id', 'sessionId', 'user', 'total_kick', 'video_file', 'mode', 'is_story', 'is_shared_to_leaderboard', 'session_duration', 'countdown_time', 'created_at']
+        read_only_fields = ['id', 'session_id', 'sessionId', 'user', 'created_at']
 
     @extend_schema_field(OpenApiTypes.URI)
     def get_video_file(self, obj):

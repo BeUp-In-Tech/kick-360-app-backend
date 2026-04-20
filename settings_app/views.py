@@ -1,4 +1,4 @@
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, mixins
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.parsers import MultiPartParser, FormParser
@@ -36,13 +36,6 @@ class ProfileViewSet(viewsets.GenericViewSet):
         full_serializer = UserSerializer(request.user, context={'request': request})
         return APIResponse(data=full_serializer.data, message="Profile updated successfully.")
 
-    @action(detail=False, methods=['get'], url_path='saved-videos')
-    def saved_videos(self, request):
-        """Get list of user's saved videos."""
-        saved = SavedVideo.objects.filter(user=request.user).select_related('session')
-        serializer = SavedVideoSerializer(saved, many=True, context={'request': request})
-        return APIResponse(data=serializer.data, message="Saved videos retrieved.")
-
     @action(detail=False, methods=['post'], url_path='toggle-save')
     def toggle_save(self, request):
         """Toggle save/unsave for a video."""
@@ -65,3 +58,23 @@ class ProfileViewSet(viewsets.GenericViewSet):
             return APIResponse(data={'is_saved': False}, message="Video removed from saved.")
         
         return APIResponse(data={'is_saved': True}, message="Video saved successfully.")
+
+class SavedVideoViewSet(mixins.ListModelMixin, mixins.DestroyModelMixin, viewsets.GenericViewSet):
+    """
+    ViewSet for listing and deleting saved videos explicitly.
+    """
+    permission_classes = [IsAuthenticated]
+    serializer_class = SavedVideoSerializer
+
+    def get_queryset(self):
+        return SavedVideo.objects.filter(user=self.request.user).select_related('session').order_by('-created_at')
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        serializer = self.get_serializer(queryset, many=True, context={'request': request})
+        return APIResponse(data=serializer.data, message="Saved videos retrieved.")
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        return APIResponse(message="Video removed from saved.", status=status.HTTP_204_NO_CONTENT)
