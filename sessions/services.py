@@ -62,7 +62,15 @@ class SessionService:
             session_duration=session_duration
         )
 
-        # 6. Recalculate rank (can be expensive, might defer to Celery in prod, but doing synchronously per req)
+        # 6. Log activity
+        from core.models import UserActivityLog
+        UserActivityLog.objects.create(
+            user=user,
+            activity_type='session_complete',
+            description=f"Completed {mode} session: {total_kick} kicks"
+        )
+
+        # 7. Recalculate rank (can be expensive, might defer to Celery in prod, but doing synchronously per req)
         SessionService.recalculate_global_rank()
 
         # Re-fetch user rank

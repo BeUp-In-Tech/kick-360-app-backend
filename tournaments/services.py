@@ -2,6 +2,7 @@ from django.utils import timezone
 from .models import Tournament, TournamentParticipation
 from notifications.utils import send_push_notification
 from accounts.models import User
+from core.models import UserActivityLog
 
 class TournamentService:
     @staticmethod
