@@ -88,3 +88,17 @@ class SavedVideoViewSet(mixins.ListModelMixin, mixins.DestroyModelMixin, viewset
         instance = self.get_object()
         self.perform_destroy(instance)
         return APIResponse(message="Video removed from saved.", status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['delete'], url_path='remove-by-session')
+    def remove_by_session(self, request):
+        """Allows deleting a saved video using the session_id directly."""
+        session_id = request.query_params.get('session_id')
+        if not session_id:
+            return APIResponse(message="session_id query parameter is required.", status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            saved_video = SavedVideo.objects.get(user=request.user, session_id=session_id)
+            saved_video.delete()
+            return APIResponse(message="Video removed from saved.", status=status.HTTP_200_OK)
+        except SavedVideo.DoesNotExist:
+            return APIResponse(message="Saved video not found.", status=status.HTTP_404_NOT_FOUND)
