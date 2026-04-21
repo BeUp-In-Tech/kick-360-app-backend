@@ -18,6 +18,7 @@ class TrainingSession(BaseModel):
     equipment_used = models.TextField(blank=True)
     steps = models.TextField(blank=True)
     video_file = models.FileField(upload_to='training/videos/', blank=True, null=True)
+    thumbnail = models.ImageField(upload_to='training/thumbnails/', blank=True, null=True)
     duration_seconds = models.IntegerField(default=60)
     points = models.IntegerField(default=0)
     score_required = models.IntegerField(default=0)
@@ -35,6 +36,7 @@ class TrainingCompletion(BaseModel):
     score_achieved = models.IntegerField(default=0)
     points_awarded = models.IntegerField(default=0)
     video_file = models.FileField(upload_to='training/completions/videos/', null=True, blank=True)
+    thumbnail = models.ImageField(upload_to='training/completions/thumbnails/', null=True, blank=True)
 
     def __str__(self):
         return f"{self.user.name} completed {self.training_session.title}"

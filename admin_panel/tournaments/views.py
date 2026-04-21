@@ -80,6 +80,6 @@ class AdminTournamentViewSet(viewsets.ModelViewSet, AdminLoggerMixin):
     @action(detail=True, methods=['get'])
     def participants(self, request, id=None):
         tournament = self.get_object()
-        participants = tournament.participations.all().order_by('-total_kicks')
+        participants = tournament.participations.all().order_by('-score', '-total_kicks')
         serializer = AdminTournamentParticipationSerializer(participants, many=True)
         return Response(serializer.data)

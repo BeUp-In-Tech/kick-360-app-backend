@@ -14,7 +14,7 @@ class TrainingSessionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = TrainingSession
-        fields = ['id', 'category', 'title', 'subtitle', 'description', 'equipment_used', 'steps', 'video_file', 'video_url', 'duration_seconds', 'points', 'score_required', 'is_published', 'created_at']
+        fields = ['id', 'category', 'title', 'subtitle', 'description', 'equipment_used', 'steps', 'video_file', 'video_url', 'thumbnail', 'duration_seconds', 'points', 'score_required', 'is_published', 'created_at']
 
     @extend_schema_field(OpenApiTypes.URI)
     def get_video_url(self, obj):
@@ -32,7 +32,7 @@ class TrainingCompletionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = TrainingCompletion
-        fields = ['id', 'user', 'training_session', 'score_achieved', 'points_awarded', 'video_file', 'created_at']
+        fields = ['id', 'user', 'training_session', 'score_achieved', 'points_awarded', 'video_file', 'thumbnail', 'created_at']
 
     @extend_schema_field(OpenApiTypes.URI)
     def get_video_file(self, obj):
@@ -46,3 +46,4 @@ class TrainingCompletionSerializer(serializers.ModelSerializer):
 class CompleteTrainingRequestSerializer(serializers.Serializer):
     score_achieved = serializers.IntegerField(default=0)
     video_file = serializers.FileField(required=False, allow_null=True)
+    thumbnail = serializers.ImageField(required=False, allow_null=True)

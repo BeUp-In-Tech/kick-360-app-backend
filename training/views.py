@@ -48,12 +48,14 @@ class TrainingCompleteView(generics.GenericAPIView):
         
         score_achieved = serializer.validated_data.get('score_achieved', 0)
         video_file = serializer.validated_data.get('video_file')
+        thumbnail = serializer.validated_data.get('thumbnail')
         
         completion = TrainingService.complete_training(
             user=request.user,
             training_session=training_session,
             score_achieved=score_achieved,
-            video_file=video_file
+            video_file=video_file,
+            thumbnail=thumbnail
         )
         
         return APIResponse(

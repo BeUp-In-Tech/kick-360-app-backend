@@ -17,7 +17,7 @@ class SessionService:
 
     @staticmethod
     @transaction.atomic
-    def complete_session(user: User, data: dict, video_file=None) -> Session:
+    def complete_session(user: User, data: dict, video_file=None, thumbnail=None) -> Session:
         """
         Creates a session and updates user statistics atomically.
         """
@@ -56,6 +56,7 @@ class SessionService:
             user=user,
             total_kick=total_kick,
             video_file=video_file,
+            thumbnail=thumbnail,
             mode=mode,
             is_story=is_story,
             is_shared_to_leaderboard=is_shared_to_leaderboard,

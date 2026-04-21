@@ -10,6 +10,7 @@ class Session(BaseModel):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sessions')
     total_kick = models.IntegerField(default=0)
     video_file = models.FileField(upload_to='sessions/videos/', null=True, blank=True)
+    thumbnail = models.ImageField(upload_to='sessions/thumbnails/', null=True, blank=True)
     mode = models.CharField(max_length=20, choices=MODE_CHOICES, default='default')
     is_story = models.BooleanField(default=False)
     is_shared_to_leaderboard = models.BooleanField(default=False)

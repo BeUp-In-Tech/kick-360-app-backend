@@ -6,7 +6,7 @@ from core.models import UserActivityLog
 
 class TournamentService:
     @staticmethod
-    def join_tournament(user: User, tournament: Tournament) -> TournamentParticipation:
+    def join_tournament(user: User, tournament: Tournament, total_kicks: int = 0, hours_played: float = 0.0, score: int = 0) -> TournamentParticipation:
         """
         User joins a tournament. Enforces "join once" rule implicitly via get_or_create 
         and unique constraint on the model.
@@ -34,8 +34,9 @@ class TournamentService:
             user=user,
             tournament=tournament,
             defaults={
-                'total_kicks': 0,
-                'hours_played': 0.0,
+                'total_kicks': total_kicks,
+                'hours_played': hours_played,
+                'score': score,
                 'rank': 0
             }
         )
@@ -48,9 +49,9 @@ class TournamentService:
     @staticmethod
     def recalculate_tournament_rank(tournament: Tournament):
         """
-        Recalculates rank for a specific tournament based on total_kicks.
+        Recalculates rank for a specific tournament based on score and total_kicks.
         """
-        participations = TournamentParticipation.objects.filter(tournament=tournament).order_by('-total_kicks')
+        participations = TournamentParticipation.objects.filter(tournament=tournament).order_by('-score', '-total_kicks')
         for i, p in enumerate(participations):
             if p.rank != i + 1:
                 p.rank = i + 1

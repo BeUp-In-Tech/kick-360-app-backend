@@ -13,5 +13,5 @@ class AdminTournamentParticipationSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = TournamentParticipation
-        fields = ['id', 'user', 'user_name', 'total_kicks', 'hours_played', 'rank']
+        fields = ['id', 'user', 'user_name', 'total_kicks', 'hours_played', 'score', 'rank']
         read_only_fields = ['id', 'user', 'user_name', 'rank']

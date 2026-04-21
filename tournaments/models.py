@@ -25,12 +25,13 @@ class TournamentParticipation(BaseModel):
     tournament = models.ForeignKey(Tournament, on_delete=models.CASCADE, related_name='participations')
     total_kicks = models.IntegerField(default=0)
     hours_played = models.FloatField(default=0.0)
+    score = models.IntegerField(default=0)
     rank = models.IntegerField(default=0)
 
     class Meta:
         unique_together = ('user', 'tournament')
         indexes = [
-            models.Index(fields=['-total_kicks']),
+            models.Index(fields=['-score', '-total_kicks']),
         ]
 
     def __str__(self):

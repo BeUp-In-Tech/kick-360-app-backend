@@ -20,12 +20,14 @@ class SessionCompleteView(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
         
         video_file = serializer.validated_data.get('video_file')
+        thumbnail = serializer.validated_data.get('thumbnail')
         
         try:
             session = SessionService.complete_session(
                 user=request.user,
                 data=serializer.validated_data,
-                video_file=video_file
+                video_file=video_file,
+                thumbnail=thumbnail
             )
             return APIResponse(
                 data=SessionSerializer(session).data,

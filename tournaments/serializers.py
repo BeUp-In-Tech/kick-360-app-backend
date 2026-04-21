@@ -18,4 +18,4 @@ class TournamentParticipationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = TournamentParticipation
-        fields = ['id', 'user', 'tournament', 'total_kicks', 'hours_played', 'rank', 'created_at']
+        fields = ['id', 'user', 'tournament', 'total_kicks', 'hours_played', 'score', 'rank', 'created_at']

@@ -35,7 +35,9 @@ class TournamentDetailView(generics.RetrieveAPIView):
         return APIResponse(data=serializer.data, message="Tournament retrieved.")
 
 class TournamentJoinSerializer(serializers.Serializer):
-    pass
+    total_kicks = serializers.IntegerField(required=False, default=0)
+    hours_played = serializers.FloatField(required=False, default=0.0)
+    score = serializers.IntegerField(required=False, default=0)
 
 @extend_schema(
     responses={200: TournamentParticipationSerializer}
@@ -49,9 +51,17 @@ class TournamentJoinView(generics.GenericAPIView):
 
     def post(self, request, *args, **kwargs):
         tournament = self.get_object()
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
         
         try:
-            participation = TournamentService.join_tournament(user=request.user, tournament=tournament)
+            participation = TournamentService.join_tournament(
+                user=request.user, 
+                tournament=tournament,
+                total_kicks=serializer.validated_data.get('total_kicks', 0),
+                hours_played=serializer.validated_data.get('hours_played', 0.0),
+                score=serializer.validated_data.get('score', 0)
+            )
             return APIResponse(
                 data=TournamentParticipationSerializer(participation).data,
                 message=f"Successfully joined tournament: {tournament.title}"
@@ -74,7 +84,7 @@ class TournamentLeaderboardView(generics.ListAPIView):
         if getattr(self, "swagger_fake_view", False):
             return TournamentParticipation.objects.none()
         tournament_id = self.kwargs['id']
-        return TournamentParticipation.objects.filter(tournament_id=tournament_id).order_by('-total_kicks')
+        return TournamentParticipation.objects.filter(tournament_id=tournament_id).order_by('-score', '-total_kicks')
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())

@@ -11,7 +11,7 @@ class SessionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Session
-        fields = ['id', 'session_id', 'sessionId', 'user', 'total_kick', 'video_file', 'mode', 'is_story', 'is_shared_to_leaderboard', 'session_duration', 'countdown_time', 'is_saved', 'created_at']
+        fields = ['id', 'session_id', 'sessionId', 'user', 'total_kick', 'video_file', 'thumbnail', 'mode', 'is_story', 'is_shared_to_leaderboard', 'session_duration', 'countdown_time', 'is_saved', 'created_at']
         read_only_fields = ['id', 'session_id', 'sessionId', 'user', 'is_saved', 'created_at']
 
     @extend_schema_field(OpenApiTypes.BOOL)
@@ -35,6 +35,7 @@ class SessionSerializer(serializers.ModelSerializer):
 class SessionCompleteSerializer(serializers.Serializer):
     total_kick = serializers.IntegerField(required=True, min_value=0)
     video_file = serializers.FileField(required=False, allow_empty_file=False)
+    thumbnail = serializers.ImageField(required=False, allow_empty_file=False)
     mode = serializers.ChoiceField(choices=Session.MODE_CHOICES, default='default')
     is_story = serializers.BooleanField(default=False)
     is_shared_to_leaderboard = serializers.BooleanField(default=False)
