@@ -30,7 +30,7 @@ class UserSerializer(serializers.ModelSerializer):
     @extend_schema_field(OpenApiTypes.OBJECT)
     def get_latest_session(self, obj):
         from sessions.serializers import SessionSerializer
-        session = obj.sessions.filter(is_story=False).order_by('-created_at').first()
+        session = obj.sessions.order_by('-created_at').first()
         if session:
             return SessionSerializer(session, context=self.context).data
         return None

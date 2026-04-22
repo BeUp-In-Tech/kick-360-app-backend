@@ -4,6 +4,7 @@ from accounts.models import User
 from tournaments.models import Tournament, TournamentParticipation
 from training.models import TrainingSession
 from follows.models import Follow
+from sessions.models import Session
 from .utils import create_user_notification, create_admin_notification
 import logging
 
@@ -85,3 +86,27 @@ def notify_user_new_follow(sender, instance, created, **kwargs):
             notification_type='NEW_FOLLOW',
             related_item_id=instance.follower.id
         )
+
+@receiver(post_save, sender=Session)
+def notify_session_activity(sender, instance, created, **kwargs):
+    if created:
+        # Notify the user themselves as a confirmation
+        create_user_notification(
+            user=instance.user,
+            title="Session Completed!",
+            message=f"You successfully completed a {instance.mode} session with {instance.total_kick} kicks.",
+            notification_type='SESSION_COMPLETE',
+            related_item_id=instance.id
+        )
+        
+        # If shared to leaderboard, notify followers
+        if instance.is_shared_to_leaderboard:
+            followers = User.objects.filter(following__following=instance.user)
+            for follower in followers:
+                create_user_notification(
+                    user=follower,
+                    title="Friend Activity",
+                    message=f"{instance.user.name or 'A friend'} shared a new session to the leaderboard!",
+                    notification_type='FRIEND_SESSION',
+                    related_item_id=instance.id
+                )

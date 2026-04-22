@@ -10,11 +10,22 @@ class TrainingCategorySerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'description', 'is_active', 'created_at']
 
 class TrainingSessionSerializer(serializers.ModelSerializer):
+    category = serializers.SlugRelatedField(slug_field='title', read_only=True)
     video_url = serializers.SerializerMethodField()
+    thumbnail = serializers.SerializerMethodField()
 
     class Meta:
         model = TrainingSession
         fields = ['id', 'category', 'title', 'subtitle', 'description', 'equipment_used', 'steps', 'video_file', 'video_url', 'thumbnail', 'duration_seconds', 'points', 'score_required', 'is_published', 'created_at']
+
+    @extend_schema_field(OpenApiTypes.URI)
+    def get_thumbnail(self, obj):
+        if obj.thumbnail:
+            request = self.context.get('request')
+            if request is not None:
+                return request.build_absolute_uri(obj.thumbnail.url)
+            return obj.thumbnail.url
+        return None
 
     @extend_schema_field(OpenApiTypes.URI)
     def get_video_url(self, obj):

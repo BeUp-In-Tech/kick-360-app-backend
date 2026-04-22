@@ -5,13 +5,15 @@ from .models import Session
 
 class SessionSerializer(serializers.ModelSerializer):
     video_file = serializers.SerializerMethodField()
+    video = serializers.SerializerMethodField()
+    thumbnail = serializers.SerializerMethodField()
     session_id = serializers.UUIDField(source='id', read_only=True)
     sessionId = serializers.UUIDField(source='id', read_only=True)
     is_saved = serializers.SerializerMethodField()
 
     class Meta:
         model = Session
-        fields = ['id', 'session_id', 'sessionId', 'user', 'total_kick', 'video_file', 'thumbnail', 'mode', 'is_story', 'is_shared_to_leaderboard', 'session_duration', 'countdown_time', 'is_saved', 'created_at']
+        fields = ['id', 'session_id', 'sessionId', 'user', 'total_kick', 'video_file', 'video', 'thumbnail', 'mode', 'is_story', 'is_shared_to_leaderboard', 'session_duration', 'countdown_time', 'is_saved', 'created_at']
         read_only_fields = ['id', 'session_id', 'sessionId', 'user', 'is_saved', 'created_at']
 
     @extend_schema_field(OpenApiTypes.BOOL)
@@ -32,9 +34,24 @@ class SessionSerializer(serializers.ModelSerializer):
             return url
         return None
 
+    @extend_schema_field(OpenApiTypes.URI)
+    def get_video(self, obj):
+        return self.get_video_file(obj)
+
+    @extend_schema_field(OpenApiTypes.URI)
+    def get_thumbnail(self, obj):
+        request = self.context.get('request')
+        if obj.thumbnail:
+            url = obj.thumbnail.url
+            if request is not None:
+                return request.build_absolute_uri(url)
+            return url
+        return None
+
 class SessionCompleteSerializer(serializers.Serializer):
     total_kick = serializers.IntegerField(required=True, min_value=0)
     video_file = serializers.FileField(required=False, allow_empty_file=False)
+    video = serializers.FileField(source='video_file', required=False, allow_empty_file=False)
     thumbnail = serializers.ImageField(required=False, allow_empty_file=False)
     mode = serializers.ChoiceField(choices=Session.MODE_CHOICES, default='default')
     is_story = serializers.BooleanField(default=False)

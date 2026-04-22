@@ -32,6 +32,7 @@ class AdminTrainingSessionSerializer(serializers.ModelSerializer):
     Time = serializers.CharField(source='duration_seconds', help_text="Duration (e.g., '10:00')")
     Points = serializers.IntegerField(source='points', default=0)
     video = serializers.FileField(source='video_file', required=False, allow_null=True)
+    thumbnail = serializers.ImageField(required=False, allow_null=True)
     is_pulished = serializers.BooleanField(source='is_published', default=False)
     reattempt = serializers.BooleanField(default=False)
     participate_count = serializers.IntegerField(read_only=True)
@@ -49,6 +50,7 @@ class AdminTrainingSessionSerializer(serializers.ModelSerializer):
             'Time',
             'Points',
             'video',
+            'thumbnail',
             'is_pulished',
             'reattempt',
             'participate_count',
