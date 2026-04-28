@@ -59,7 +59,10 @@ def send_push_notification(users, title, body, data_payload=None):
                 # Set APNS for iOS
                 apns=messaging.APNSConfig(
                     payload=messaging.APNSPayload(
-                        aps=messaging.Aps(sound='default'),
+                        aps=messaging.Aps(
+                            sound='default',
+                            content_available=True,
+                        ),
                     ),
                 ),
             )

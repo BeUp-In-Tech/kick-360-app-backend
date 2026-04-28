@@ -71,7 +71,7 @@ class RegisterView(generics.CreateAPIView):
         tokens = get_tokens_for_user(user)
         return APIResponse(
             data={
-                "user": UserSerializer(user).data,
+                "user": UserSerializer(user, context={'request': request}).data,
                 "tokens": tokens
             },
             message="User registered successfully."
@@ -107,7 +107,7 @@ class LoginView(generics.GenericAPIView):
         tokens = get_tokens_for_user(user)
         return APIResponse(
             data={
-                "user": UserSerializer(user).data,
+                "user": UserSerializer(user, context={'request': request}).data,
                 "tokens": tokens
             },
             message="Login successful."
